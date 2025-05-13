@@ -1,0 +1,39 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+                             http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+    <!-- web.xml의 최상위 루트 엘리먼트로, web-app 설정임을 명시 -->
+
+    <display-name>dumbo-backend</display-name>
+    <!-- 애플리케이션 이름 (개발에만 사용됨) -->
+
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <!-- 서블릿 이름 (임의의 식별자) -->
+
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- Spring MVC의 핵심 서블릿: 요청을 인터셉트하고 컨트롤러로 전달 -->
+
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+            <!-- 자바 기반의 @Configuration 클래스를 사용하겠다는 설정 -->
+        </init-param>
+
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>com.dumbo.config.AppConfig</param-value>
+            <!-- Spring 설정 클래스의 전체 클래스 경로 지정 -->
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+        <!-- 톰캣이 서블릿을 애플리케이션 시작 시 로드하도록 설정 -->
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+        <!-- 모든 요청을 DispatcherServlet으로 전달하겠다는 의미 -->
+    </servlet-mapping>
+</web-app>
