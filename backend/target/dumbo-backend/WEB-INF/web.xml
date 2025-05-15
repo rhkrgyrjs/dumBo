@@ -23,7 +23,10 @@
 
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>com.dumbo.config.AppConfig</param-value>
+            <param-value>
+                com.dumbo.config.AppConfig
+                com.dumbo.config.DataSourceConfig
+            </param-value>
             <!-- Spring 설정 클래스의 전체 클래스 경로 지정 -->
         </init-param>
 

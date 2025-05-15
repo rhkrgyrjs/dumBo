@@ -28,3 +28,12 @@
 - **배포**
  - Docker(예정)
 
+---
+
+## DB 스키마
+ - users 테이블
+  - id char(36) : Primary Key. UUID() 내장 함수로 생성
+  - username varchar(50) : 로그인 시 사용되는 유저명
+  - password char(60) : bcrypt 로 단방향 암호화된 문자열
+  - email varchar(254) : RFC 5321 기준 전체 주소는 최대 254자 제한. 메일 주소 전체를 하나의 컬럼으로 저장하는 일반적 기준을 따름
+  - created_at datetime : 가입일시
