@@ -19,6 +19,29 @@ public class UserDaoJdbcService implements UserDao
     @Autowired
     private DBConnectionMaker connectionMaker;
 
+    public User loginCheck(String username, String password) throws SQLException
+    {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next() && Bcrypt.verifyPassword(password, rs.getString("password")))
+                {
+                    User user = new User();
+                    user.setId(rs.getString("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPassword(rs.getString("password"));
+                    user.setEmail(rs.getString("email"));
+                    user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    return user;
+                }
+                else { return null; }
+            }
+        }
+    }
+
     public User findUserByUsername(String username) throws SQLException
     {
         String sql = "SELECT * FROM users WHERE username = ?";

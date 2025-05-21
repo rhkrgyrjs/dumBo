@@ -12,6 +12,9 @@ import javax.validation.Valid;
 import com.dumbo.repository.dao.UserDao;
 import com.dumbo.repository.dto.UserDTO;
 
+import com.dumbo.util.JWT;
+
+// 회원가입/로그인 기능을 담당하는 컨트롤러.
 @RestController
 @RequestMapping("/users")
 public class UserController 
@@ -19,6 +22,32 @@ public class UserController
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private JWT jwt;
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> body)
+    {
+        String username = body.get("username");
+        String password = body.get("password");
+        Map<String, String> response = new HashMap<>();
+        try {
+            if (userDao.loginCheck(username, password) != null)
+            {
+                response.put("message", "로그인에 성공했습니다.");
+                response.putAll(jwt.generateRefreshTokenAndAccessToken(username));
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "로그인에 실패했습니다.");
+                return ResponseEntity.status(409).body(response);
+            }
+        } catch (Exception e) {
+            response.put("message", "로그인 시도 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 회원가입 중 username 중복체크 API
     @PostMapping("/signup/usernameCheck")
     public ResponseEntity<Map<String, String>> usernameCheck(@RequestBody Map<String, String> body)
     {
@@ -38,6 +67,7 @@ public class UserController
         }
     }
 
+    // 회원가입 중 email 중복체크 API
     @PostMapping("/signup/emailCheck")
     public ResponseEntity<Map<String, String>> emailCheck(@RequestBody Map<String, String> body)
     {
@@ -57,6 +87,7 @@ public class UserController
         }
     }
 
+    // 회원가입 API
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserDTO userDto)
     {

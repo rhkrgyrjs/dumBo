@@ -97,11 +97,11 @@ export default function AuthForm() {
     setMessage('');
 
     try {
-      const res = await fetch('http://localhost:8080/dumbo-backend/login', {
+      const res = await fetch('http://localhost:8080/dumbo-backend/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: loginData.username,
+          username: loginData.username,
           password: loginData.password,
         }),
       });
