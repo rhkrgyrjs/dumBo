@@ -1,12 +1,24 @@
-// DB 커넥션을 만드는 역할을 담당하는 클래스. 추상 클래스라 구현해서 쓰면 됨
+// DB 커넥션 만드는 클래스
 
 package com.dumbo.repository.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface DBConnectionMaker 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
+
+@Component
+public class DBConnectionMaker 
 {
-    // java.sql.Connection 형태의 DB 커넥션을 리턴하는 함수
-    Connection makeConnection() throws SQLException;
+    @Autowired
+    private DataSource dataSource;
+
+    // java.sql.Connection 형태의 DB 커넥션을 리턴하는 함수 
+    public Connection makeConnection() throws SQLException
+    {
+        return dataSource.getConnection();
+    }
 }

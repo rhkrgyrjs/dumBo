@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
+// src/main/resources/application.properties 에서 설정값을 가져와, DriverManagerDataSource로 DB 커넥션을 가져옴
+// 사용하는 DB나 접속 방식이 바뀌어도 application.properties를 수정해 바꿀 수 있다.
 @Configuration
 @PropertySource("classpath:application.properties")
 public class DataSourceConfig 

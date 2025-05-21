@@ -1,6 +1,5 @@
 package com.dumbo.controller;  // 이 컨트롤러가 속한 패키지
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;      // GET 요청 매핑 어노테이션
 import org.springframework.web.bind.annotation.RestController; // REST 컨트롤러로 등록 (응답을 JSON으로 처리)
 
@@ -10,7 +9,6 @@ import java.time.ZoneId;              // 타임존 ID (예: Asia/Seoul)
 import java.util.HashMap;             // 응답을 위한 Map 객체
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController  // @Controller + @ResponseBody 를 합친 어노테이션 (응답을 JSON 형태로 반환)
 public class TimeController {
 

@@ -1,12 +1,12 @@
 // App.js
 import React from 'react';
-import SignupForm from './RegisterUserTest';
+import AuthForm from './AuthFormTest'; // AuthForm이 같은 폴더에 있다고 가정
 
 function App() {
   return (
-    <div className="App">
-      <h1>회원가입 페이지</h1>
-      <SignupForm />
+    <div>
+      <h1>내 간단 로그인/회원가입</h1>
+      <AuthForm />
     </div>
   );
 }

@@ -62,6 +62,41 @@
             <version>8.0.33</version>  <!-- 원하는 최신 버전으로 교체 가능 -->
         </dependency>
 
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.2.5.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
+        </dependency>
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.lettuce</groupId> <!-- core가 아니라 io.lettuce -->
+            <artifactId>lettuce-core</artifactId>
+            <version>6.2.5.RELEASE</version> <!-- 실제 존재하는 버전 확인 필요 -->
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>dumbo-backend</finalName>
