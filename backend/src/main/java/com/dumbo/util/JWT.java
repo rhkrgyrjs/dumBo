@@ -106,8 +106,8 @@ public class JWT
 
     // 리프레시 토큰 + 액세스 토큰 생성
     // 어차피 리프레시 토큰이 생성될 때, 엑세스 토큰도 같이 생성해야 함
-    // 리프레시 토큰은 '쿠키 형태'로 리턴
-    public Map<String, Object> generateRefreshTokenAndAccessToken(String userId)
+    // 리프레시 토큰은 'Set-Cookie의 헤더 형태'로 리턴
+    public Map<String, String> generateRefreshTokenAndAccessToken(String userId)
     {
         Date refreshTokenExpDate = new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP_TIME);
         String refreshToken = Jwts.builder()
@@ -125,15 +125,16 @@ public class JWT
                                 .signWith(SECRET_KEY)
                                 .compact();
 
-        Map<String, Object> tokens = new HashMap<>();
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        Map<String, String> tokens = new HashMap<>();
+        ResponseCookie refreshTokenCookie = ResponseCookie  // 토큰 정책 설정은 개발 완료 단계에서 다시 고민
+        .from("refreshToken", refreshToken)
         .httpOnly(true)
-        .secure(false)          // HTTPS 환경일 때만 필요
+        .secure(false)
         .path("/dumbo-backend/auth/reissue")
         .maxAge(Duration.ofSeconds(REFRESH_TOKEN_EXP_TIME / 1000))
-        .sameSite("None")    // "Lax", "None" 도 가능
+        .sameSite("None")
         .build();
-        tokens.put("refreshTokenCookie", refreshTokenCookie);
+        tokens.put("refreshTokenCookie", refreshTokenCookie.toString());
         tokens.put("accessToken", accessToken);
         return tokens;
     }

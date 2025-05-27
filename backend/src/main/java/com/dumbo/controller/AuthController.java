@@ -42,10 +42,10 @@ public class AuthController
                 // 로그인 성공 시
 
                 // 1. 액세스 토큰 + 리프레시 토큰 발급
-                Map<String, Object> tokens = jwt.generateRefreshTokenAndAccessToken(username);
+                Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(username);
                 
                 // 2. 리프레시 토큰을 저장할 쿠키 설정(httpOnly)
-                servResponse.addHeader("Set-Cookie", ((ResponseCookie) tokens.get("refreshTokenCookie")).toString());
+                servResponse.addHeader("Set-Cookie", tokens.get("refreshTokenCookie"));
                 
                 // 3. 액세스 토큰 설정
                 Map<String, String> accessToken = new HashMap<>();
@@ -90,10 +90,10 @@ public class AuthController
                     if (username != null)
                     {
                         // 4. 리프레시 토큰이 유효하다면, 액세스 토큰 + 리프레시 토큰 재발급
-                        Map<String, Object> tokens = jwt.generateRefreshTokenAndAccessToken(username);
+                        Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(username);
 
                         // 4.1. 리프레시 토큰 쿠키로 등록
-                        servResponse.addHeader("Set-Cookie", ((ResponseCookie) tokens.get("refreshTokenCookie")).toString());
+                        servResponse.addHeader("Set-Cookie", tokens.get("refreshTokenCookie"));
 
                         // 4.2. 액세스 토큰 응답에 추가
                         Map<String, String> accessToken = new HashMap<>();
