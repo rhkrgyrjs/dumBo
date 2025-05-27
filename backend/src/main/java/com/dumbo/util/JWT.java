@@ -1,6 +1,7 @@
 package com.dumbo.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
@@ -12,6 +13,9 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.http.ResponseCookie;
+import java.time.Duration;
 
 /*
  * 어떤 메소드가 필요한가? -> UX를 기반으로 생각해 보자.
@@ -62,7 +66,7 @@ public class JWT
 
     // 리프레시 토큰이 유효한지 검증
     // 검증 성공시 userId, 검증 실패시 null 반환
-    private String validateRefreshToken(String refreshToken)
+    public String validateRefreshToken(String refreshToken)
     {
         try
         {
@@ -102,7 +106,8 @@ public class JWT
 
     // 리프레시 토큰 + 액세스 토큰 생성
     // 어차피 리프레시 토큰이 생성될 때, 엑세스 토큰도 같이 생성해야 함
-    public Map<String, String> generateRefreshTokenAndAccessToken(String userId)
+    // 리프레시 토큰은 '쿠키 형태'로 리턴
+    public Map<String, Object> generateRefreshTokenAndAccessToken(String userId)
     {
         Date refreshTokenExpDate = new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP_TIME);
         String refreshToken = Jwts.builder()
@@ -120,8 +125,15 @@ public class JWT
                                 .signWith(SECRET_KEY)
                                 .compact();
 
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("refreshToken", refreshToken);
+        Map<String, Object> tokens = new HashMap<>();
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        .httpOnly(true)
+        .secure(false)          // HTTPS 환경일 때만 필요
+        .path("/dumbo-backend/auth/reissue")
+        .maxAge(Duration.ofSeconds(REFRESH_TOKEN_EXP_TIME / 1000))
+        .sameSite("None")    // "Lax", "None" 도 가능
+        .build();
+        tokens.put("refreshTokenCookie", refreshTokenCookie);
         tokens.put("accessToken", accessToken);
         return tokens;
     }

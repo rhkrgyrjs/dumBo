@@ -9,7 +9,7 @@ com/dumbo/config/JsonfyDTO.class
 com/dumbo/repository/db/UserDaoJdbcService.class
 com/dumbo/config/JwtConfig.class
 com/dumbo/repository/db/UserDaoMyBatisService.class
-com/dumbo/controller/UserController.class
+com/dumbo/controller/AuthController.class
 com/dumbo/config/AppConfig.class
 com/dumbo/controller/TimeController.class
 com/dumbo/repository/db/DBConnectionMaker.class

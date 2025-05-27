@@ -97,9 +97,10 @@ export default function AuthForm() {
     setMessage('');
 
     try {
-      const res = await fetch('http://localhost:8080/dumbo-backend/users/login', {
+      const res = await fetch('http://localhost:8080/dumbo-backend/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 이 부분 꼭 추가
         body: JSON.stringify({
           username: loginData.username,
           password: loginData.password,
