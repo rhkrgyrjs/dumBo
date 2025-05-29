@@ -3,6 +3,8 @@
 import React from 'react';
 import AuthForm from './AuthFormTest'; // AuthForm이 같은 폴더에 있다고 가정
 import ReissueTest from './ReissueTest';
+import LoginTest from './components/modals/LoginTest';
+import LoginModal from './components/modals/LoginModal';
 
 function App() {
   return (
@@ -10,6 +12,7 @@ function App() {
       <h1>내 간단 로그인/회원가입</h1>
       <AuthForm />
       <ReissueTest />
+      <LoginModal />
     </div>
   );
 }

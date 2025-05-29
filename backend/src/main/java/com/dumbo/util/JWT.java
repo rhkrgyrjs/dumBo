@@ -132,7 +132,7 @@ public class JWT
         .secure(false)
         .path("/dumbo-backend/auth/reissue")
         .maxAge(Duration.ofSeconds(REFRESH_TOKEN_EXP_TIME / 1000))
-        .sameSite("None")
+        .sameSite("Lax")
         .build();
         tokens.put("refreshTokenCookie", refreshTokenCookie.toString());
         tokens.put("accessToken", accessToken);

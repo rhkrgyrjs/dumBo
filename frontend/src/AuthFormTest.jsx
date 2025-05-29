@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { modalPush } from './components/modals/ModalManager';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -123,6 +124,7 @@ export default function AuthForm() {
 
   return (
     <div style={{ maxWidth: 400, margin: 'auto', padding: 20, fontFamily: 'Arial' }}>
+      <button onClick={() => {modalPush("login")}}>로그인 모달 열기</button>
       <div style={{ marginBottom: 20 }}>
         <button
           onClick={() => { setIsLogin(true); setMessage(''); }}
