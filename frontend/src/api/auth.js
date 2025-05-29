@@ -1,18 +1,38 @@
 import requestWithCredentials from "./axios/requestWithCredentials";
 import { getAccessToken, setAccessToken } from "./token/accessToken";
+import { modalPush } from "../components/modals/LoginModal";
 
 // 로그인(토큰), 회원가입 등 API 요청 처리
 
-// 액세스 토큰 저장
-function storeAccessToken(accessToken)
-{
-
-}
-
 // 토큰 페어 요청 : 로그인과는 다른 API 사용, Access Token 필요
-function requestTokenPair(accessToken)
+export async function requestTokenPair(accessToken)
 {
-    
+    try
+    {
+        const res = await requestWithCredentials.post(
+            '/auth/reissue'
+        );
+        setAccessToken(res.data.accessToken.token);
+    }
+    catch (error)
+    {
+        if (error.response)
+        {
+            // 서버로부터 응답은 받았지만, 토큰 재발급이 실패한 경우
+            // 재로그인을 유도해야 함
+            console.log(error.response);
+        }
+        else if (error.request)
+        {
+            // 서버로부터 응답이 오지 않을 경우
+            console.log(error.request);
+        }
+        else
+        {
+            // 다른 에러 발생 시
+            console.log(error);
+        }
+    }
 }
 
 // 로그인

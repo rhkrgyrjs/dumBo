@@ -21,7 +21,7 @@ export default function LoginModal()
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50"
+          className="shadow-sm fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50"
           onClick={modalPop}>
 
           <div
@@ -51,7 +51,7 @@ export default function LoginModal()
                 onClick={handleLogin}
                 className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
             >
-                로그인 테스트
+                로그인
             </button>
             </div>
 

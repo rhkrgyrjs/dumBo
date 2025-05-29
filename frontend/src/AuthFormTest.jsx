@@ -31,8 +31,8 @@ export default function AuthForm() {
   // 중복체크 공통 함수
   const checkDuplicate = async (type) => {
     const urlMap = {
-      username: 'http://localhost:8080/dumbo-backend/users/signup/usernameCheck',
-      email: 'http://localhost:8080/dumbo-backend/users/signup/emailCheck',
+      username: 'http://localhost:8080/dumbo-backend/auth/signup/usernameCheck',
+      email: 'http://localhost:8080/dumbo-backend/auth/signup/emailCheck',
     };
     const value = signupData[type];
     if (!value) {
@@ -68,7 +68,7 @@ export default function AuthForm() {
     }
 
     try {
-      const res = await fetch('http://localhost:8080/dumbo-backend/users/signup', {
+      const res = await fetch('http://localhost:8080/dumbo-backend/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

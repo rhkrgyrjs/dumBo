@@ -5,11 +5,12 @@ import AuthForm from './AuthFormTest'; // AuthForm이 같은 폴더에 있다고
 import ReissueTest from './ReissueTest';
 import LoginTest from './components/modals/LoginTest';
 import LoginModal from './components/modals/LoginModal';
+import Header from './components/Header';
 
 function App() {
   return (
     <div>
-      <h1>내 간단 로그인/회원가입</h1>
+      <Header />
       <AuthForm />
       <ReissueTest />
       <LoginModal />
