@@ -45,6 +45,16 @@ public class JWT
         this.REFRESH_TOKEN_EXP_TIME = refreshTokenExpTime;
     }
 
+    // 유저의 리프레시 토큰을 담은 쿠키를 만료시키기 위한 RequestCookie
+    private String invalidateRefreshTokenCookie = (ResponseCookie
+    .from("refreshToken", "")
+    .path("/dumbo-backend/auth/reissue")
+    .maxAge(0)
+    .httpOnly(true)
+    .secure(false)
+    .sameSite("Lax")
+    .build()).toString();
+
     // 토큰의 만료 + 유저가 특정 자원(자원의 생성자인지)에 접근할 권한이 있는지 검증
     public boolean validateAccessToken(String accessToken, String userId)
     {
@@ -79,6 +89,8 @@ public class JWT
 
             // 2. 받은 토큰의 키값이 Redis에 존재하는가?
             String userId = claims.getSubject();
+            // 2.1. 만약 만료시킨 토큰을 받았을 경우
+            if (userId.equals("")) { return null; }
             String storedToken = redis.getRefreshToken(userId);
 
             // 3. 받은 토큰이 Redis에 존재하는 토큰과 일치하는가?
@@ -141,4 +153,6 @@ public class JWT
 
     // 리프레시 토큰 Redis에서 삭제(로그아웃 요청 처리용)
     public void invalidateRefreshToken(String userId) { redis.deleteRefreshToken(userId); }
+
+    public String getInvalidateRefreshTokenCookie() { return this.invalidateRefreshTokenCookie; }
 }

@@ -1,19 +1,17 @@
-
 // App.js
-import React from 'react';
-import AuthForm from './AuthFormTest'; // AuthForm이 같은 폴더에 있다고 가정
-import ReissueTest from './ReissueTest';
-import LoginTest from './components/modals/LoginTest';
-import LoginModal from './components/modals/LoginModal';
 import Header from './components/Header';
+import LoginTemp from './components/LoginTemp';
+import SignupTemp from './components/SignupTemp';
+import Modals from './components/modals/Modals';
 
-function App() {
+function App() 
+{
   return (
     <div>
+      <Modals />
       <Header />
-      <AuthForm />
-      <ReissueTest />
-      <LoginModal />
+      <LoginTemp />
+      <SignupTemp />
     </div>
   );
 }

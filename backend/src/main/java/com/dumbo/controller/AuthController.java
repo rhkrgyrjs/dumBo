@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +19,8 @@ import com.dumbo.repository.dao.UserDao;
 import com.dumbo.repository.dto.UserDTO;
 
 import com.dumbo.util.JWT;
+
+import com.dumbo.repository.entity.User;
 
 // 회원가입/로그인 기능을 담당하는 컨트롤러.
 @RestController
@@ -36,8 +40,10 @@ public class AuthController
         String username = body.get("username");
         String password = body.get("password");
         Map<String, Object> response = new HashMap<>();
-        try {
-            if (userDao.loginCheck(username, password) != null)
+        try 
+        {
+            User user = userDao.loginCheck(username, password);
+            if (user != null)
             {
                 // 로그인 성공 시
 
@@ -52,11 +58,14 @@ public class AuthController
                 accessToken.put("token", (String) tokens.get("accessToken"));
                 accessToken.put("username", username);
                 response.put("accessToken", accessToken);
+                
+                // 4. 닉네임 알려주기
+                response.put("nickname", user.getNickname());
 
-                // 4. 로그인 성공 메시지 설정
+                // 5. 로그인 성공 메시지 설정
                 response.put("message", "로그인에 성공했습니다.");
                 
-                // 5. HTTP 200
+                // 6. HTTP 200
                 return ResponseEntity.ok(response);
             } else {
                 response.put("message", "로그인에 실패했습니다.");
@@ -66,6 +75,38 @@ public class AuthController
             response.put("message", "로그인 시도 중 오류가 발생했습니다.");
             return ResponseEntity.status(500).body(response);
         }
+    }
+
+    // 로그아웃 요청 API
+    // 로그아웃 요청은 실패할 수 없음.
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest servRequest, HttpServletResponse servResponse)
+    {
+        Map<String, Object> response = new HashMap<>();
+        Cookie[] cookies = servRequest.getCookies();
+
+        // 1. 요청에 쿠키가 동봉되었는지 확인
+        if (cookies != null)
+        {
+            // 2. 요청에 쿠키가 있다면 리프레시 토큰을 포함한 쿠키가 있는지 확인
+            for (Cookie cookie : cookies)
+            {
+                if ("refreshToken".equals(cookie.getName()))
+                {
+                    // 3. 요청에 리프레시 토큰이 포함된 쿠키가 있는지 확인
+                    String username = jwt.validateRefreshToken(cookie.getValue());
+                    if (username != null)
+                    {
+                        // 4. Redis에서 리프레시 토큰 삭제
+                        jwt.invalidateRefreshToken(username);
+                    }
+                }
+            }
+        }
+        // 5. 유저에게 응답 보내기
+        servResponse.addHeader("Set-Cookie", jwt.getInvalidateRefreshTokenCookie());
+        response.put("message", "로그아웃에 성공했습니다.");
+        return ResponseEntity.ok(response);
     }
 
     // 액세스 토큰 + 리프레시 토큰 재발급 API
@@ -87,7 +128,14 @@ public class AuthController
                     
                     // 3. 리프레시 토큰이 있을 경우, 리프레시 토큰 검증
                     String username = jwt.validateRefreshToken(oldRefreshToken);
-                    if (username != null)
+                    User user = null;
+                    try { user = userDao.findUserByUsername(username); }
+                    catch (SQLException e) 
+                    {
+                        response.put("message", "유저 정보가 명확하지 않습니다.");
+                        return ResponseEntity.status(401).body(response);
+                    }
+                    if (username != null && user != null)
                     {
                         // 4. 리프레시 토큰이 유효하다면, 액세스 토큰 + 리프레시 토큰 재발급
                         Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(username);
@@ -101,6 +149,9 @@ public class AuthController
                         accessToken.put("username", username);
                         
                         response.put("accessToken", accessToken);
+
+                        // 4.3. 닉네임 응답에 추가
+                        response.put("nickname", user.getNickname());
 
                         // 4.3. 성공 메시지 추가
                         response.put("message", "토큰이 성공적으로 재발급되었습니다.");

@@ -1,18 +1,17 @@
 import requestWithCredentials from "./axios/requestWithCredentials";
-import { getAccessToken, setAccessToken } from "./token/accessToken";
-import { modalPush } from "../components/modals/LoginModal";
+import request from './axios/request'
 
 // 로그인(토큰), 회원가입 등 API 요청 처리
 
-// 토큰 페어 요청 : 로그인과는 다른 API 사용, Access Token 필요
-export async function requestTokenPair(accessToken)
+// 토큰 페어 요청 : 로그인과는 다른 API 사용
+export async function requestTokenPair()
 {
     try
     {
         const res = await requestWithCredentials.post(
             '/auth/reissue'
         );
-        setAccessToken(res.data.accessToken.token);
+        return { 'nickname' : res.data.nickname, 'username' : res.data.accessToken.username, 'accessToken' : res.data.accessToken.token };
     }
     catch (error)
     {
@@ -32,6 +31,7 @@ export async function requestTokenPair(accessToken)
             // 다른 에러 발생 시
             console.log(error);
         }
+        return null;
     }
 }
 
@@ -45,8 +45,7 @@ export async function login(username, password)
             '/auth/login',
             { 'username' : username, 'password' : password}
         );
-        // 로그인 성공 시 액세스 토큰 저장
-        setAccessToken(res.data.accessToken.token);
+        return { 'nickname' : res.data.nickname, 'username' : res.data.accessToken.username, 'accessToken' : res.data.accessToken.token };
     }
     catch (error)
     {
@@ -66,13 +65,34 @@ export async function login(username, password)
             // 다른 에러 발생 시
             console.log(error);
         }
+        return null;
     }
 }
 
-// 회원가입
-function signup(username, email, password, passwordCheck)
+export async function logout()
+{
+    try{ let res = await requestWithCredentials.post('/auth/logout'); console.log(res.data); }
+    catch (error) { if (error.request) console.log('서버로부터 요청이 오지 않음'); }
+}
+
+// 회원가입 --> 일단 임시로 짜놓음
+export async function signup(username, password, passwordConfirm, nickname, email)
 {
     // 기입 정보 체크 -> 기입 정보가 올바르지 않다면 요청 보내지 않음
     // 회원가입 요청
     // 요청 성공/실패 여부 리턴
+    
+    try
+    {
+        // 로그인 요청
+        const res = await request.post(
+            '/auth/signup',
+            { 'username' : username, 'password' : password, 'passwordConfirm' : password, 'nickname' : nickname, 'email' : email }
+        );
+        return true;
+    } catch (error)
+    {
+        console.log(error);
+        return false;
+    }
 }

@@ -1,10 +1,24 @@
+import { useSelector, useDispatch } from "react-redux";
+import { clearUserInfo } from "../redux/authSlice"; 
+import { showModal } from "../redux/modalStackSlice";
+import { logout } from "../api/auth";
+
 export default function Header()
 {
+    const { nickname } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+
+    function handleLogout()
+    {
+        logout();
+        dispatch(clearUserInfo());
+    }
+
     return(
-        <header className="bg-white bg-gray-200 shadow-sm p-4 border-b-2 border-gray-300 rounded">
+        <header className=" bg-gray-100 shadow-sm p-4 border-b-2 border-gray-300 rounded">
             <div className="flex justify-between items-center w-full">
                 {/* 로고 - 왼쪽에 딱 붙음 */}
-                <div className="text-xl font-bold">DummyBoard</div>
+                <div className="text-xl font-bold">DumBo</div>
 
                 {/* 네비게이션 
                 <nav className="space-x-6 hidden md:block">
@@ -13,10 +27,17 @@ export default function Header()
                 <a href="#" className="text-gray-600 hover:text-black transition">Contact</a>
                 </nav>*/}
 
-                {/* 로그인 버튼 */}
-                <button className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
-                Login
-                </button>
+                {nickname ?
+               
+                 (<div className="flex items-center space-x-4">
+                    <h1 className="font-bold">{nickname}</h1>
+                    <button onClick={handleLogout} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+                    로그아웃
+                    </button>
+                </div>) :  (<button onClick={() => { dispatch(showModal('login')); }} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                로그인
+                </button>)
+                }
             </div>
         </header>
     );

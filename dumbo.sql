@@ -26,6 +26,7 @@ CREATE TABLE `users` (
   `id` char(36) NOT NULL DEFAULT (uuid()),
   `username` varchar(50) NOT NULL,
   `password` char(60) NOT NULL,
+  `nickname` varchar(8) NOT NULL,
   `email` varchar(254) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-15 20:24:44
+-- Dump completed on 2025-05-31 21:48:10

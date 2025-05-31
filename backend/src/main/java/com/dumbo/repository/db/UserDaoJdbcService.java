@@ -33,6 +33,7 @@ public class UserDaoJdbcService implements UserDao
                     user.setId(rs.getString("id"));
                     user.setUsername(rs.getString("username"));
                     user.setPassword(rs.getString("password"));
+                    user.setNickname(rs.getString("nickname"));
                     user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
@@ -56,6 +57,7 @@ public class UserDaoJdbcService implements UserDao
                     user.setId(rs.getString("id"));
                     user.setUsername(rs.getString("username"));
                     user.setPassword(rs.getString("password"));
+                    user.setNickname(rs.getString("nickname"));
                     user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
@@ -79,6 +81,7 @@ public class UserDaoJdbcService implements UserDao
                     user.setId(rs.getString("id"));
                     user.setUsername(rs.getString("username"));
                     user.setPassword(rs.getString("password"));
+                    user.setNickname(rs.getString("nickname"));
                     user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
@@ -90,13 +93,14 @@ public class UserDaoJdbcService implements UserDao
 
     public void createUser(UserDTO userDto) throws SQLException
     {
-        String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (username, password, email, nickname) VALUES (?, ?, ?, ?)";
 
         try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
             ps.setString(1, userDto.getUsername());
             ps.setString(2, Bcrypt.hashPassword(userDto.getPassword())); // Bcrypt 암호화
             ps.setString(3, userDto.getEmail());
+            ps.setString(4, userDto.getNickname());
             
             if (ps.executeUpdate() == 0) throw new SQLException("Creating user failed, no rows affected.");
         }

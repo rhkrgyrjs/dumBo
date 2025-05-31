@@ -1,12 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import modalReducer from './modalSlice';
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
+import authReducer from './authSlice';
+import modalStack from './modalStackSlice';
 
-const store = configureStore(
+export const store = configureStore(
 {
-  reducer: 
-  {
-    modal: modalReducer,
-  },
-});
+    reducer : 
+    {
+        auth: authReducer,
+        modal: modalStack,
+    },
 
-export default store;
+    middleware : (middleware) => middleware({ serializableCheck: false, }), // serializable 경고 안 뜨게 하기 위해
+});
