@@ -80,7 +80,7 @@ export default function SignupModal()
     };
 
     // 상태가 전부 맞는지 체크
-    const nicknameValid = Object.values(nicknameConditions).every(Boolean) && nickname;
+    const nicknameValid = Object.values(nicknameConditions).every(Boolean);
     const emailValid = Object.values(emailConditions).every(Boolean);
     const passwordValid = Object.values(passwordConditions).every(Boolean);
     const passwordConfirmValid = Object.values(passwordConfirmConditions).every(Boolean);
@@ -219,7 +219,7 @@ export default function SignupModal()
                         className={`w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(password.length, passwordValid)}`}
                         required
                         onChange={(e) => setPassword(e.target.value)}
-                        onFocus={() => setPasswordFocus(true)}
+                        onFocus={() => { setPasswordFocus(true); document.getElementById("signup-password-confirm").value=""; setPasswordConfirm(""); }}
                         onBlur={() => setPasswordFocus(false)}
                     />
                     <button
@@ -283,7 +283,7 @@ export default function SignupModal()
                   id="signup-password-confirm"
                   placeholder="비밀번호 확인"
                   autoComplete="new-password"
-                  className={`w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(passwordConfirm.length, passwordConfirmValid)}`}
+                  className={`w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(passwordConfirm.length, passwordConfirmValid) && inputBorderClass(password.length, passwordValid)}`}
                   required
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   onFocus={() => setPasswordConfirmFocus(true)}
