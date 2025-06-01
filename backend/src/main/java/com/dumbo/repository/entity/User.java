@@ -13,7 +13,6 @@ public class User
     @Id
     private String id;
     
-    private String username;
     private String password;
     private String nickname;
     private String email;
@@ -22,14 +21,12 @@ public class User
     private LocalDateTime createdAt;
 
     public String getId() { return this.id; }
-    public String getUsername() { return this.username; }
     public String getPassword() { return this.password; }
     public String getNickname() { return this.nickname; }
     public String getEmail() { return this.email; }
     public LocalDateTime getCreatedAt() { return this.createdAt; }
 
     public void setId(String id) { this.id = id; }
-    public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
     public void setNickname(String nickname) { this.nickname = nickname; }
     public void setEmail(String email) { this.email = email; }

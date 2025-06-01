@@ -11,7 +11,7 @@ export async function requestTokenPair()
         const res = await requestWithCredentials.post(
             '/auth/reissue'
         );
-        return { 'nickname' : res.data.nickname, 'username' : res.data.accessToken.username, 'accessToken' : res.data.accessToken.token };
+        return { 'nickname' : res.data.nickname, 'userId' : res.data.accessToken.userId, 'accessToken' : res.data.accessToken.token };
     }
     catch (error)
     {
@@ -36,16 +36,16 @@ export async function requestTokenPair()
 }
 
 // 로그인
-export async function login(username, password)
+export async function login(email, password)
 {
     try
     {
         // 로그인 요청
         const res = await requestWithCredentials.post(
             '/auth/login',
-            { 'username' : username, 'password' : password}
+            { 'email' : email, 'password' : password}
         );
-        return { 'nickname' : res.data.nickname, 'username' : res.data.accessToken.username, 'accessToken' : res.data.accessToken.token };
+        return { 'nickname' : res.data.nickname, 'userId' : res.data.accessToken.userId, 'accessToken' : res.data.accessToken.token };
     }
     catch (error)
     {
@@ -76,7 +76,7 @@ export async function logout()
 }
 
 // 회원가입 --> 일단 임시로 짜놓음
-export async function signup(username, password, passwordConfirm, nickname, email)
+export async function signup(email, password, passwordConfirm, nickname)
 {
     // 기입 정보 체크 -> 기입 정보가 올바르지 않다면 요청 보내지 않음
     // 회원가입 요청
@@ -87,7 +87,7 @@ export async function signup(username, password, passwordConfirm, nickname, emai
         // 로그인 요청
         const res = await request.post(
             '/auth/signup',
-            { 'username' : username, 'password' : password, 'passwordConfirm' : password, 'nickname' : nickname, 'email' : email }
+            { 'email' : email, 'password' : password, 'passwordConfirm' : password, 'nickname' : nickname }
         );
         return true;
     } catch (error)

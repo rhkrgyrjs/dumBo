@@ -37,18 +37,18 @@ public class AuthController
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body, HttpServletResponse servResponse)
     {
-        String username = body.get("username");
+        String email = body.get("email");
         String password = body.get("password");
         Map<String, Object> response = new HashMap<>();
         try 
         {
-            User user = userDao.loginCheck(username, password);
+            User user = userDao.loginCheck(email, password);
             if (user != null)
             {
                 // 로그인 성공 시
 
                 // 1. 액세스 토큰 + 리프레시 토큰 발급
-                Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(username);
+                Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(user.getId());
                 
                 // 2. 리프레시 토큰을 저장할 쿠키 설정(httpOnly)
                 servResponse.addHeader("Set-Cookie", tokens.get("refreshTokenCookie"));
@@ -56,7 +56,7 @@ public class AuthController
                 // 3. 액세스 토큰 설정
                 Map<String, String> accessToken = new HashMap<>();
                 accessToken.put("token", (String) tokens.get("accessToken"));
-                accessToken.put("username", username);
+                accessToken.put("userId", user.getId());
                 response.put("accessToken", accessToken);
                 
                 // 4. 닉네임 알려주기
@@ -94,11 +94,11 @@ public class AuthController
                 if ("refreshToken".equals(cookie.getName()))
                 {
                     // 3. 요청에 리프레시 토큰이 포함된 쿠키가 있는지 확인
-                    String username = jwt.validateRefreshToken(cookie.getValue());
-                    if (username != null)
+                    String userId = jwt.validateRefreshToken(cookie.getValue());
+                    if (userId != null)
                     {
                         // 4. Redis에서 리프레시 토큰 삭제
-                        jwt.invalidateRefreshToken(username);
+                        jwt.invalidateRefreshToken(userId);
                     }
                 }
             }
@@ -127,18 +127,18 @@ public class AuthController
                     String oldRefreshToken = cookie.getValue();
                     
                     // 3. 리프레시 토큰이 있을 경우, 리프레시 토큰 검증
-                    String username = jwt.validateRefreshToken(oldRefreshToken);
+                    String userId = jwt.validateRefreshToken(oldRefreshToken);
                     User user = null;
-                    try { user = userDao.findUserByUsername(username); }
+                    try { user = userDao.findUserByUserId(userId); }
                     catch (SQLException e) 
                     {
                         response.put("message", "유저 정보가 명확하지 않습니다.");
                         return ResponseEntity.status(401).body(response);
                     }
-                    if (username != null && user != null)
+                    if (userId != null && user != null)
                     {
                         // 4. 리프레시 토큰이 유효하다면, 액세스 토큰 + 리프레시 토큰 재발급
-                        Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(username);
+                        Map<String, String> tokens = jwt.generateRefreshTokenAndAccessToken(userId);
 
                         // 4.1. 리프레시 토큰 쿠키로 등록
                         servResponse.addHeader("Set-Cookie", tokens.get("refreshTokenCookie"));
@@ -146,7 +146,7 @@ public class AuthController
                         // 4.2. 액세스 토큰 응답에 추가
                         Map<String, String> accessToken = new HashMap<>();
                         accessToken.put("token", (String) tokens.get("accessToken"));
-                        accessToken.put("username", username);
+                        accessToken.put("userId", userId);
                         
                         response.put("accessToken", accessToken);
 
@@ -168,26 +168,6 @@ public class AuthController
         response.put("message", "토큰 재발급 중 오류가 발생했습니다.");
         return ResponseEntity.status(401).body(response);
         // 예외 발생(HTTP 401)시 재로그인 유도해야함
-    }
-
-    // 회원가입 중 username 중복체크 API
-    @PostMapping("/signup/usernameCheck")
-    public ResponseEntity<Map<String, String>> usernameCheck(@RequestBody Map<String, String> body)
-    {
-        String username = body.get("username");
-        Map<String, String> response = new HashMap<>();
-        try {
-            if (userDao.findUserByUsername(username) == null) {
-                response.put("message", "사용 가능한 유저명입니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("message", "사용 불가능한 유저명입니다.");
-                return ResponseEntity.status(409).body(response);
-            }
-        } catch (Exception e) {
-            response.put("message", "유저명 중복 체크 중 문제가 발생했습니다.");
-            return ResponseEntity.status(500).body(response);
-        }
     }
 
     // 회원가입 중 email 중복체크 API

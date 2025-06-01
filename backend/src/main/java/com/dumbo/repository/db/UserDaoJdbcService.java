@@ -19,22 +19,21 @@ public class UserDaoJdbcService implements UserDao
     @Autowired
     private DBConnectionMaker connectionMaker;
 
-    public User loginCheck(String username, String password) throws SQLException
+    public User loginCheck(String email, String password) throws SQLException
     {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
-            ps.setString(1, username);
+            ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery())
             {
                 if (rs.next() && Bcrypt.verifyPassword(password, rs.getString("password")))
                 {
                     User user = new User();
                     user.setId(rs.getString("id"));
-                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
                     user.setPassword(rs.getString("password"));
                     user.setNickname(rs.getString("nickname"));
-                    user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
                 }
@@ -43,22 +42,21 @@ public class UserDaoJdbcService implements UserDao
         }
     }
 
-    public User findUserByUsername(String username) throws SQLException
+    public User findUserByUserId(String userId) throws SQLException
     {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
         try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
-            ps.setString(1, username);
+            ps.setString(1, userId);
             try (ResultSet rs = ps.executeQuery())
             {
                 if (rs.next())
                 {
                     User user = new User();
                     user.setId(rs.getString("id"));
-                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
                     user.setPassword(rs.getString("password"));
                     user.setNickname(rs.getString("nickname"));
-                    user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
                 }
@@ -79,10 +77,9 @@ public class UserDaoJdbcService implements UserDao
                 {
                     User user = new User();
                     user.setId(rs.getString("id"));
-                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
                     user.setPassword(rs.getString("password"));
                     user.setNickname(rs.getString("nickname"));
-                    user.setEmail(rs.getString("email"));
                     user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return user;
                 }
@@ -93,14 +90,13 @@ public class UserDaoJdbcService implements UserDao
 
     public void createUser(UserDTO userDto) throws SQLException
     {
-        String sql = "INSERT INTO users (username, password, email, nickname) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, password, nickname) VALUES (?, ?, ?)";
 
         try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
-            ps.setString(1, userDto.getUsername());
+            ps.setString(1, userDto.getEmail());
             ps.setString(2, Bcrypt.hashPassword(userDto.getPassword())); // Bcrypt 암호화
-            ps.setString(3, userDto.getEmail());
-            ps.setString(4, userDto.getNickname());
+            ps.setString(3, userDto.getNickname());
             
             if (ps.executeUpdate() == 0) throw new SQLException("Creating user failed, no rows affected.");
         }

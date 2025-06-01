@@ -7,11 +7,9 @@ import javax.validation.constraints.Size;
 
 public class UserDTO 
 {
-    @NotBlank(message = "사용자 이름은 필수입니다.")
-    @Size(min = 2, max = 20, message = "사용자명은 2자 이상, 20자 이하여야 합니다.")
-    @Pattern(regexp = "^(?!.*[!@#$%^&*()+={}\\\\[\\\\]|\\\\\\\\:;\\\"'<>,?/]).+$",
-            message = "유저명에 사용 불가한 특수문자가 포함되어 있습니다.")
-    private String username;
+    @NotBlank(message = "이메일은 필수입니다.")
+    @Email(message = "이메일 형식이 올바르지 않습니다.")
+    private String email;
 
     @NotBlank(message = "비밀번호는 필수입니다.")
     @Size(min = 8, max = 20, message = "비밀번호는 8자 이상, 20자 이하여야 합니다.")
@@ -28,19 +26,14 @@ public class UserDTO
             message = "닉네임에 사용 불가한 특수문자가 포함되어 있습니다.")
     private String nickname;
 
-    @NotBlank(message = "이메일은 필수입니다.")
-    @Email(message = "이메일 형식이 올바르지 않습니다.")
-    private String email;
 
     public UserDTO() {}
 
-    public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getPasswordConfirm() { return passwordConfirm; }
     public String getNickname() { return nickname; }
     public String getEmail() { return email; }
     
-    public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
     public void setPasswordConfirm(String passwordConfirm) { this.passwordConfirm = passwordConfirm; }
     public void setNickname(String nickname) { this.nickname = nickname; }

@@ -1,5 +1,6 @@
 import FadeBackground from "./FadeBackground";
 import LoginModal from "./LoginModal";
+import SignupModal from "./SignupModal";
 
 export default function Modals()
 {
@@ -7,6 +8,7 @@ export default function Modals()
         <div>
             <FadeBackground />
             <LoginModal />
+            <SignupModal />
         </div>
     );
 }

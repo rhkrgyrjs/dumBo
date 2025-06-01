@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { registerModal, popModal } from "../../redux/modalStackSlice";
+import { registerModal, showModal, popModal } from "../../redux/modalStackSlice";
 import { setUserInfo } from "../../redux/authSlice";
 import { login } from "../../api/auth";
 import FocusLock from "react-focus-lock";
@@ -15,17 +15,17 @@ export default function LoginModal()
   
   async function handleLogin()
   {
-    let res = await login(document.getElementById("login-username").value, document.getElementById("login-password").value);
+    let res = await login(document.getElementById("login-email").value, document.getElementById("login-password").value);
     if (res !== null)
     {
-      dispatch(setUserInfo({ 'nickname' : res.nickname, 'username' : res.username, 'accessToken' : res.accessToken }));
+      dispatch(setUserInfo({ 'nickname' : res.nickname, 'userId' : res.userId, 'accessToken' : res.accessToken }));
       dispatch(popModal());
     }
   }
 
   function modalClear()
   {
-    document.getElementById("login-username").value = "";
+    document.getElementById("login-email").value = "";
     document.getElementById("login-password").value = "";
   }
 
@@ -39,7 +39,8 @@ export default function LoginModal()
   <div id="login-modal">
     {modalShow && (
       <div
-        className={"fixed inset-0 flex justify-center items-center z-" + modalInfo.z}
+        style={{ zIndex: modalInfo.z }}
+        className="fixed inset-0 flex justify-center items-center"
         onClick={() => {dispatch(popModal()); }}>
 
         <div
@@ -59,30 +60,46 @@ export default function LoginModal()
                 e.preventDefault(); // 새로고침 막기
                 await handleLogin();
               }}
-              className="flex flex-col space-y-4"
+              className="flex flex-col space-y-4 items-center"
             >
-              <input
-                type="text"
-                id="login-username"
-                placeholder="username"
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                required
-              />
-              <input
-                type="password"
-                id="login-password"
-                placeholder="password"
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                required
-              />
+              <div className="flex items-center gap-x-2 w-full">
+                  <span className="mr-2">📧</span>
+                <input
+                  type="text"
+                  id="login-email"
+                  placeholder="email"
+                  autoComplete="new-email"
+                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-x-2 w-full">
+                <span className="mr-2">🔒</span>
+                <input
+                  type="password"
+                  id="login-password"
+                  placeholder="password"
+                  autoComplete="new-password"
+                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  required
+                />
+              </div>
+
               <button
                 type="submit"
-                className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                className="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700"
               >
                 로그인
               </button>
             </form>
           </FocusLock>
+          <div className="mt-4 text-center">
+            <a onClick={() => { dispatch(showModal('signup')); }}
+              className="text-indigo-600 underline hover:text-indigo-800 cursor-pointer">
+              처음이신가요?
+            </a>
+          </div>
 
         </div>
       </div>
