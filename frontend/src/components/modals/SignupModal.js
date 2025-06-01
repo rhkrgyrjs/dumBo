@@ -26,20 +26,6 @@ export default function SignupModal()
     const [showPassword, setShowPassword] = useState(false);
     function togglePasswordVisibility() { setShowPassword((prev) => !prev); };
 
-    function modalClear()
-    {
-        document.getElementById("signup-email").value = "";
-        document.getElementById("signup-password").value = "";
-        document.getElementById("signup-password-confirm").value="";
-        document.getElementById("signup-nickname").value = "";
-        setShowPassword(false);
-    }
-
-    useEffect(() => 
-    {
-        dispatch(registerModal({ 'modalName' : 'signup', 'modalClear' : modalClear, 'setModalShow' : setModalShow, 'setModalInfo' : setModalInfo }));
-    }, [dispatch]);
-
 
     // 말풍선 처리 관련
     
@@ -54,6 +40,28 @@ export default function SignupModal()
     const [emailFocus, setEmailFocus] = useState(false);
     const [passwordFocus, setPasswordFocus] = useState(false);
     const [passwordConfirmFocus, setPasswordConfirmFocus] = useState(false);
+
+    function modalClear()
+    {
+        document.getElementById("signup-email").value = "";
+        document.getElementById("signup-password").value = "";
+        document.getElementById("signup-password-confirm").value="";
+        document.getElementById("signup-nickname").value = "";
+        setShowPassword(false);
+        setNickname(false);
+        setEmail(false);
+        setPassword(false);
+        setPasswordConfirm(false);
+        setNicknameFocus(false);
+        setEmailFocus(false);
+        setPasswordFocus(false);
+        setPasswordConfirmFocus(false);
+    }
+
+    useEffect(() => 
+    {
+        dispatch(registerModal({ 'modalName' : 'signup', 'modalClear' : modalClear, 'setModalShow' : setModalShow, 'setModalInfo' : setModalInfo }));
+    }, [dispatch]);
 
     // 검사 정규식
     const nicknameConditions = 
