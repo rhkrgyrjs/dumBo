@@ -11,6 +11,8 @@ export default function LoginModal()
   const [modalInfo, setModalInfo] = useState({fade : false, z : 0});
   // show : 모달을 띄울 것인가, fade : 모달을 블러처리 할 것인가, z : 모달의 z인덱스
 
+  const [loginFailed, setLoginFailed] = useState(false);
+
   const dispatch = useDispatch();
   
   async function handleLogin()
@@ -21,12 +23,14 @@ export default function LoginModal()
       dispatch(setUserInfo({ 'nickname' : res.nickname, 'userId' : res.userId, 'accessToken' : res.accessToken }));
       dispatch(popModal());
     }
+    else { document.getElementById("login-email").focus(); document.getElementById("login-email").select(); setLoginFailed(true); }
   }
 
   function modalClear()
   {
     document.getElementById("login-email").value = "";
     document.getElementById("login-password").value = "";
+    setLoginFailed(false);
   }
 
 
@@ -86,6 +90,9 @@ export default function LoginModal()
                 />
               </div>
 
+              { loginFailed &&
+              (<p className="text-red-500">아이디 또는 비밀번호가 올바르지 않습니다.</p>)
+              }
               <button
                 type="submit"
                 className="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700"

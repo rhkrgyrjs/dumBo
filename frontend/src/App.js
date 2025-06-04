@@ -1,6 +1,6 @@
 // App.js
 import Header from './components/Header';
-import LoginTemp from './components/LoginTemp';
+import PostTemp from './components/PostTemp';
 import Modals from './components/modals/Modals';
 
 function App() 
@@ -9,7 +9,7 @@ function App()
     <div>
       <Modals />
       <Header />
-      <LoginTemp />
+      <PostTemp />
     </div>
   );
 }

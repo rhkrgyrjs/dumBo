@@ -65,6 +65,29 @@ public class UserDaoJdbcService implements UserDao
         }
     }
 
+    public User findUserByNickname(String nickname) throws SQLException
+    {
+        String sql = "SELECT * FROM users WHERE nickname = ?";
+        try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, nickname);
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
+                    User user = new User();
+                    user.setId(rs.getString("id"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPassword(rs.getString("password"));
+                    user.setNickname(rs.getString("nickname"));
+                    user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    return user;
+                }
+                else { return null; }
+            }
+        }
+    }
+
     public User findUserByEmail(String email) throws SQLException
     {
         String sql = "SELECT * FROM users WHERE email = ?";

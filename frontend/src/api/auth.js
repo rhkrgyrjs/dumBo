@@ -71,12 +71,46 @@ export async function login(email, password)
 
 export async function logout()
 {
-    try{ let res = await requestWithCredentials.post('/auth/logout'); console.log(res.data); }
+    try { let res = await requestWithCredentials.post('/auth/logout'); console.log(res.data); }
     catch (error) { if (error.request) console.log('서버로부터 요청이 오지 않음'); }
 }
 
+
+
+// 닉네임 사용 가능한지 체크
+export async function nicknameCheck(nickname)
+{
+    try
+    {
+        let res = await request.post('/auth/signup/nicknameCheck', { 'nickname' : nickname });
+        console.log(res.data.message);
+        return res.data.useable;
+    }
+    catch (error)
+    {
+        console.log(error);
+        return false;
+    }
+}
+
+// 이메일 사용 가능한지 체크
+export async function emailCheck(email)
+{
+    try
+    {
+        let res = await request.post('/auth/signup/emailCheck', { 'email' : email });
+        console.log(res.data.message);
+        return res.data.useable;
+    }
+    catch (error)
+    {
+        console.log(error);
+        return false;
+    }
+}
+
 // 회원가입 --> 일단 임시로 짜놓음
-export async function signup(email, password, passwordConfirm, nickname)
+export async function signup(email, password, nickname)
 {
     // 기입 정보 체크 -> 기입 정보가 올바르지 않다면 요청 보내지 않음
     // 회원가입 요청
@@ -87,7 +121,7 @@ export async function signup(email, password, passwordConfirm, nickname)
         // 로그인 요청
         const res = await request.post(
             '/auth/signup',
-            { 'email' : email, 'password' : password, 'passwordConfirm' : password, 'nickname' : nickname }
+            { 'email' : email, 'password' : password, 'nickname' : nickname }
         );
         return true;
     } catch (error)

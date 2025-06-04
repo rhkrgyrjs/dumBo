@@ -170,21 +170,47 @@ public class AuthController
         // 예외 발생(HTTP 401)시 재로그인 유도해야함
     }
 
+    // 회원가입 중 nickname 중복체크 API
+    @PostMapping("/signup/nicknameCheck")
+    public ResponseEntity<Map<String, Object>> nicknameCheck(@RequestBody Map<String, String> body)
+    {
+        String nickname = body.get("nickname");
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (userDao.findUserByNickname(nickname) == null) {
+                response.put("useable", true);
+                response.put("message", "사용 가능한 닉네임입니다.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("useable", false);
+                response.put("message", "사용 불가능한 닉네임입니다.");
+                return ResponseEntity.status(409).body(response);
+            }
+        } catch (Exception e) {
+            response.put("useable", false);
+            response.put("message", "닉네임 중복 체크 중 문제가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     // 회원가입 중 email 중복체크 API
     @PostMapping("/signup/emailCheck")
-    public ResponseEntity<Map<String, String>> emailCheck(@RequestBody Map<String, String> body)
+    public ResponseEntity<Map<String, Object>> emailCheck(@RequestBody Map<String, String> body)
     {
         String email = body.get("email");
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             if (userDao.findUserByEmail(email) == null) {
+                response.put("useable", true);
                 response.put("message", "사용 가능한 이메일입니다.");
                 return ResponseEntity.ok(response);
             } else {
+                response.put("useable", false);
                 response.put("message", "사용 불가능한 이메일입니다.");
                 return ResponseEntity.status(409).body(response);
             }
         } catch (Exception e) {
+            response.put("useable", false);
             response.put("message", "이메일 중복 체크 중 문제가 발생했습니다.");
             return ResponseEntity.status(500).body(response);
         }

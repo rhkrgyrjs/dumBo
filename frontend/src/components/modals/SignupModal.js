@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { registerModal, popModal } from "../../redux/modalStackSlice";
 import { setUserInfo } from "../../redux/authSlice";
-import { login } from "../../api/auth";
+import { emailCheck, login, nicknameCheck, signup } from "../../api/auth";
 import FocusLock from "react-focus-lock";
 
 export default function SignupModal()
@@ -12,15 +12,54 @@ export default function SignupModal()
     // show : 모달을 띄울 것인가, fade : 모달을 블러처리 할 것인가, z : 모달의 z인덱스
 
     const dispatch = useDispatch();
+
+    const [message, setMessage] = useState({ "message" : null, "isError" : null });
+    
+    const [nicknameError, setNicknameError] = useState(false);
+    const [emailError, setEmailError] = useState(false);
+    const [disableInput, setDisableInput] = useState(false);
     
     async function handleSignup()
     {
-        let res = await login(document.getElementById("login-username").value, document.getElementById("login-password").value);
-        if (res !== null)
-        {
-        dispatch(setUserInfo({ 'nickname' : res.nickname, 'username' : res.username, 'accessToken' : res.accessToken }));
-        dispatch(popModal());
-        }
+      // 0. 모든 칸이 초록불인지 체크
+      if (!(nicknameValid && emailValid && passwordValid && passwordConfirmValid))
+      {
+        setMessage({ "message" : "모든 항목에 올바른 값을 입력해주세요.", "isError" : true });
+        return;
+      }
+      // 1. 닉네임 중복체크
+      // 2. 이메일 중복체크
+      let nicknameRes = await nicknameCheck(nickname);
+      let emailRes = await emailCheck(email);
+      // 3. 닉네임/이메일 중복체크 결과에 문제가 있으면 화면 업데이트
+      if (nicknameRes === false)
+      {
+        setNickname("");
+        setNicknameError(true);
+      }
+      if (emailRes === false)
+      {
+        setEmail("");
+        setEmailError(true);
+      }
+      if (nicknameRes === false || emailRes === false) return;
+      // 4. 닉네임/이메일 중복체크 결과에 문제가 없다면 회원가입 요청
+      let signupRes = await signup(email, password, nickname);
+      // 5. 회원가입이 성공적으로 처리되었다면 회원가입 성공! 화면 업데이트
+      if (signupRes === true)
+      {
+        setMessage({ "message" : "회원가입이 완료되었습니다!", "isError" : false });
+        // 입력창과 버튼 비활성화하기
+        setDisableInput(true);
+        return;
+      }
+      // 6. 회원가입에 오류가 생겼다면 화면 업데이트
+      else
+      {
+        setMessage({ "message" : "알 수 없는 오류로 회원가입에 실패했습니다.", "isError" : true });
+        return;
+      }
+      
     }
 
     const [showPassword, setShowPassword] = useState(false);
@@ -43,19 +82,19 @@ export default function SignupModal()
 
     function modalClear()
     {
-        document.getElementById("signup-email").value = "";
-        document.getElementById("signup-password").value = "";
-        document.getElementById("signup-password-confirm").value="";
-        document.getElementById("signup-nickname").value = "";
-        setShowPassword(false);
-        setNickname(false);
-        setEmail(false);
-        setPassword(false);
-        setPasswordConfirm(false);
+        setNickname("");
+        setEmail("");
+        setPassword("");
+        setPasswordConfirm("");
         setNicknameFocus(false);
         setEmailFocus(false);
         setPasswordFocus(false);
         setPasswordConfirmFocus(false);
+        setShowPassword(false);
+        setMessage({ "message" : null, "isError" : null });
+        setNicknameError(false);
+        setEmailError(false);
+        setDisableInput(false);
     }
 
     useEffect(() => 
@@ -145,13 +184,15 @@ export default function SignupModal()
                 <input
                   type="text"
                   id="signup-nickname"
-                  placeholder="닉네임"
+                  value={nickname}
+                  placeholder={`${(nicknameError && nickname === "") ? "이미 사용중인 닉네임입니다." : "닉네임"}`}
                   autoComplete="off"
-                  className={`w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(nickname.length, nicknameValid)}`}
+                  className={`${(nicknameError && nickname === "") ? "bg-red-300" : ""} disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(nickname.length, nicknameValid)}`}
                   onChange={(e) => setNickname(e.target.value)}
                   onFocus={() => setNicknameFocus(true)}
                   onBlur={() => setNicknameFocus(false)}
                   required
+                  disabled={disableInput}
                 />
                 {nicknameFocus && !nicknameValid &&
                 (
@@ -192,13 +233,15 @@ export default function SignupModal()
                   <input
                     type="email"
                     id="signup-email"
-                    placeholder="이메일"
+                    value={email}
+                    placeholder={`${(emailError && email === "") ? "이미 사용중인 이메일입니다." : "이메일"}`}
                     autoComplete="new-email"
-                    className={`w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(email.length, emailValid)}`}
+                    className={`${(emailError && email === "") ? "bg-red-300" : ""} disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(email.length, emailValid)}`}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailFocus(true)}
                     onBlur={() => setEmailFocus(false)}
                     required
+                    disabled={disableInput}
                   />
                   {emailFocus && !emailValid &&
                 (
@@ -222,10 +265,12 @@ export default function SignupModal()
                     <input
                         type={showPassword ? "text" : "password"}
                         id="signup-password"
+                        value={password}
                         placeholder="비밀번호"
                         autoComplete="new-password"
-                        className={`w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(password.length, passwordValid)}`}
+                        className={`disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(password.length, passwordValid)}`}
                         required
+                        disabled={disableInput}
                         onChange={(e) => setPassword(e.target.value)}
                         onFocus={() => { setPasswordFocus(true); document.getElementById("signup-password-confirm").value=""; setPasswordConfirm(""); }}
                         onBlur={() => setPasswordFocus(false)}
@@ -289,10 +334,12 @@ export default function SignupModal()
                 <input
                   type={showPassword ? "text" : "password"}
                   id="signup-password-confirm"
+                  value={passwordConfirm}
                   placeholder="비밀번호 확인"
                   autoComplete="new-password"
-                  className={`w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(passwordConfirm.length, passwordConfirmValid) && inputBorderClass(password.length, passwordValid)}`}
+                  className={`disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${inputBorderClass(passwordConfirm.length, passwordConfirmValid) && inputBorderClass(password.length, passwordValid)}`}
                   required
+                  disabled={disableInput}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   onFocus={() => setPasswordConfirmFocus(true)}
                   onBlur={() => setPasswordConfirmFocus(false)}
@@ -312,10 +359,14 @@ export default function SignupModal()
                 }
                 </div>
                 </div>
-                
+
+                { message.message !== null && message.isError !== null &&
+                (<p className={`${message.isError === true ? "text-red-500" : "text-green-500"}`}>{ message.message }</p>)
+                }
                 <button
                   type="submit"
-                  className="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                  className="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                  disabled={disableInput}
                 >
                   회원가입
                 </button>
