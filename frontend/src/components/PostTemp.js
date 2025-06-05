@@ -3,6 +3,7 @@ import { Editor } from "react-draft-wysiwyg"; // WYSIWYG 에디터 컴포넌트 
 import { EditorState, convertToRaw } from "draft-js"; // 에디터 상태 관리 및 내용을 raw 객체로 변환하는 함수
 import draftToHtml from "draftjs-to-html"; // draft-js의 raw content를 HTML 문자열로 변환해주는 라이브러리
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"; // 에디터 스타일시트 임포트
+import DOMPurify from "dompurify"; // 서버로 날릴 HTML의 보안 위협을 막기 위해
 
 const PostTemp = () => {
   // 에디터 상태를 관리 (초기값은 빈 에디터 상태)
@@ -100,6 +101,8 @@ const PostTemp = () => {
       console.log("이미지 URL 맵:", urlMap);
       // 변환된 HTML 내용 출력
       console.log("작성된 HTML:", htmlContent);
+
+      console.log("안전하게 변환된 HTML", DOMPurify.sanitize(htmlContent));
 
       // 완료 메시지 표시
       alert("글 작성이 완료되었습니다!");

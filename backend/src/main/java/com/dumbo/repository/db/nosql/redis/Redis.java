@@ -1,4 +1,4 @@
-package com.dumbo.util;
+package com.dumbo.repository.db.nosql.redis;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;

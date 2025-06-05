@@ -1,4 +1,4 @@
-package com.dumbo.repository.db;
+package com.dumbo.repository.dao.user;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.dumbo.repository.dao.UserDao;
+import com.dumbo.repository.db.rdbms.DBConnectionMaker;
 import com.dumbo.repository.dto.UserDTO;
 import com.dumbo.repository.entity.User;
 import com.dumbo.util.Bcrypt;

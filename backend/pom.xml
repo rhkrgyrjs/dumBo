@@ -97,6 +97,18 @@
             <version>6.2.5.RELEASE</version> <!-- 실제 존재하는 버전 확인 필요 -->
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>2.9.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>dumbo-backend</finalName>

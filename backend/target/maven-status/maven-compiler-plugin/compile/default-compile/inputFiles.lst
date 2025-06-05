@@ -4,6 +4,7 @@
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/db/DBConnectionMaker.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/controller/AuthController.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/controller/TimeController.java
+/home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/controller/PostContoller.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/config/JsonfyDTO.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/util/JWT.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/config/DataSourceConfig.java

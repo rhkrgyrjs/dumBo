@@ -1,6 +1,6 @@
 // DB 커넥션 만드는 클래스
 
-package com.dumbo.repository.db;
+package com.dumbo.repository.db.rdbms;
 
 import java.sql.Connection;
 import java.sql.SQLException;

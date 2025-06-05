@@ -1,4 +1,4 @@
-package com.dumbo.repository.dao;
+package com.dumbo.repository.dao.user;
 
 import java.sql.SQLException;
 
