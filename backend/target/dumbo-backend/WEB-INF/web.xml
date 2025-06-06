@@ -28,6 +28,7 @@
                 com.dumbo.config.DataSourceConfig
                 com.dumbo.config.JwtConfig
                 com.dumbo.config.RedisConfig
+                com.dumbo.config.KafkaConfig
             </param-value>
             <!-- Spring 설정 클래스의 전체 클래스 경로 지정 -->
         </init-param>

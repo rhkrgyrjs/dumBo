@@ -5,6 +5,8 @@ import draftToHtml from "draftjs-to-html"; // draft-js의 raw content를 HTML �
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"; // 에디터 스타일시트 임포트
 import DOMPurify from "dompurify"; // 서버로 날릴 HTML의 보안 위협을 막기 위해
 
+import request from "../api/axios/request";
+
 const PostTemp = () => {
   // 에디터 상태를 관리 (초기값은 빈 에디터 상태)
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
@@ -55,6 +57,33 @@ const PostTemp = () => {
     return data.url;
   };
 
+  // 허용할 이미지 도메인 배열 (예시)
+const allowedImageDomains = [
+  "http://localhost:5000/uploads"
+];
+
+// HTML 정리 함수 예시
+function sanitizeHtmlWithImageFilter(dirtyHtml) {
+  // DOMPurify의 hook을 이용해 이미지 src 필터링
+  DOMPurify.addHook("uponSanitizeElement", (node, data) => {
+    if (node.tagName === "IMG") {
+      const src = node.getAttribute("src") || "";
+      const allowed = allowedImageDomains.some((domain) => src.startsWith(domain));
+      if (!allowed) {
+        // 허용 도메인이 아니면 이미지 태그 자체를 제거
+        node.parentNode && node.parentNode.removeChild(node);
+      }
+    }
+  });
+
+  const cleanHtml = DOMPurify.sanitize(dirtyHtml);
+
+  // hook 제거(중복 방지)
+  DOMPurify.removeAllHooks();
+
+  return cleanHtml;
+}
+
   // 글 작성 완료 시 호출되는 함수
   const handleSubmit = async () => {
     try {
@@ -102,7 +131,13 @@ const PostTemp = () => {
       // 변환된 HTML 내용 출력
       console.log("작성된 HTML:", htmlContent);
 
-      console.log("안전하게 변환된 HTML", DOMPurify.sanitize(htmlContent));
+      // 이미지 출처도 한번 거르기============================================
+      const imgFiltered = sanitizeHtmlWithImageFilter(htmlContent);
+
+      console.log("안전하게 변환된 HTML", imgFiltered);
+
+      let res = request.post('/post/draft', {'title' : '임시제목', 'content' : imgFiltered});
+console.log(res.data);
 
       // 완료 메시지 표시
       alert("글 작성이 완료되었습니다!");
@@ -245,6 +280,8 @@ const PostTemp = () => {
             previewImage: true, // 미리보기 기능 활성화
             alt: { present: true, mandatory: false }, // alt 태그 입력 옵션 활성화
             title: "이미지 업로드", // 이미지 버튼 툴팁
+            uploadEnabled: true,   // 로컬 업로드 허용
+            urlEnabled: false,     // URL 삽입 비활성화
           },
           remove: { title: "서식 제거" },
           history: {
@@ -273,6 +310,7 @@ const PostTemp = () => {
       >
         글 업로드
       </button>
+      <button onClick={() => {console.log(request.post('post/draft').data)}}>테스트</button>
     </div>
   );
 };

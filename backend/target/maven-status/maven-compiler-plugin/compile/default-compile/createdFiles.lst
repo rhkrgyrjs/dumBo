@@ -1,4 +1,5 @@
 com/dumbo/config/DataSourceConfig.class
+com/dumbo/config/KafkaConfig.class
 com/dumbo/util/Redis.class
 com/dumbo/repository/dto/UserDTO.class
 com/dumbo/util/Bcrypt.class
@@ -9,9 +10,13 @@ com/dumbo/config/JsonfyDTO.class
 com/dumbo/repository/db/UserDaoJdbcService.class
 com/dumbo/config/JwtConfig.class
 com/dumbo/repository/db/UserDaoMyBatisService.class
+com/dumbo/repository/dao/PostDao.class
+com/dumbo/repository/entity/Post.class
 com/dumbo/controller/AuthController.class
+com/dumbo/repository/dto/PostDTO.class
 com/dumbo/config/AppConfig.class
 com/dumbo/controller/PostContoller.class
+com/dumbo/repository/db/PostDaoJdbcService.class
 com/dumbo/controller/TimeController.class
 com/dumbo/repository/db/DBConnectionMaker.class
 com/dumbo/repository/dao/UserDao.class

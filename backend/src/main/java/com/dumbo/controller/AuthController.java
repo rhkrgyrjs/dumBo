@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.dumbo.repository.dao.user.UserDao;
+import com.dumbo.repository.dao.UserDao;
 import com.dumbo.repository.dto.UserDTO;
 
 import com.dumbo.util.JWT;

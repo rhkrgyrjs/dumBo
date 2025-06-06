@@ -4,9 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import com.dumbo.repository.db.nosql.redis.Redis;
-
 import org.springframework.beans.factory.annotation.Value;
+
+import com.dumbo.util.Redis;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
