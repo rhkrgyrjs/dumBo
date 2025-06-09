@@ -2,9 +2,29 @@
 import Header from './components/Header';
 import PostTemp from './components/PostTemp';
 import Modals from './components/modals/Modals';
+import { useEffect } from 'react';
+import { requestTokenPair } from './api/auth';
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from './redux/authSlice';
 
 function App() 
 {
+  const dispatch = useDispatch();
+
+  useEffect(() => 
+  {( async () => 
+    {
+      const res = await requestTokenPair();
+      if (res !== null) {
+      dispatch(setUserInfo({
+        nickname: res.nickname,
+        userId: res.userId,
+        accessToken: res.accessToken
+      }));
+    }
+  })(); // 즉시 실행
+  }, []);
+
   return (
     <div>
       <Modals />

@@ -56,7 +56,7 @@ public class AuthController
                 // 3. 액세스 토큰 설정
                 Map<String, String> accessToken = new HashMap<>();
                 accessToken.put("token", (String) tokens.get("accessToken"));
-                accessToken.put("userId", user.getId());
+                accessToken.put("userId", user.getId()); // userId를 같이 리턴할 필요가 있을까? 프론트에서는 자신의 userId를 모르는 게 보안상 더 나을 수도 있다.
                 response.put("accessToken", accessToken);
                 
                 // 4. 닉네임 알려주기
@@ -146,7 +146,7 @@ public class AuthController
                         // 4.2. 액세스 토큰 응답에 추가
                         Map<String, String> accessToken = new HashMap<>();
                         accessToken.put("token", (String) tokens.get("accessToken"));
-                        accessToken.put("userId", userId);
+                        accessToken.put("userId", userId); // 응답에 userId 포함할지는 좀 더 생각해 보자.
                         
                         response.put("accessToken", accessToken);
 

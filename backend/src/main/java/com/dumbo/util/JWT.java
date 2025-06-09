@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import com.dumbo.repository.dao.UserDao;
+import com.dumbo.repository.entity.User;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -15,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseCookie;
+
+import java.sql.SQLException;
 import java.time.Duration;
 
 /*
@@ -38,6 +43,9 @@ public class JWT
     @Autowired
     private Redis redis;
 
+    @Autowired
+    private UserDao userDao;
+
     public JWT(SecretKey secretKey, long accessTokenExpTime, long refreshTokenExpTime)
     {
         this.SECRET_KEY = secretKey;
@@ -55,8 +63,26 @@ public class JWT
     .sameSite("Lax")
     .build()).toString();
 
+    public User validateAccessToken(String accessToken)
+    {
+        if (accessToken == null) return null;
+        try
+        {
+            // 1. JWT 토큰이 유효한가?
+            Claims claims = Jwts.parserBuilder()
+                            .setSigningKey(SECRET_KEY)
+                            .build()
+                            .parseClaimsJws(accessToken)
+                            .getBody();
+
+            // 2. 유저 정보가 DB에 존재하는지 확인
+            try { return userDao.findUserByUserId(claims.getSubject()); }
+            catch (SQLException e) { return null; }
+        } catch (JwtException e) { return null; }
+    }
+
     // 토큰의 만료 + 유저가 특정 자원(자원의 생성자인지)에 접근할 권한이 있는지 검증
-    public boolean validateAccessToken(String accessToken, String userId)
+    public boolean validateAccessTokenForContent(String accessToken, String userId)
     {
         if (accessToken == null) return false;
         try

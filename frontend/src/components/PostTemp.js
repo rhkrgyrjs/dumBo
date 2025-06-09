@@ -5,11 +5,18 @@ import draftToHtml from "draftjs-to-html"; // draft-js의 raw content를 HTML �
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"; // 에디터 스타일시트 임포트
 import DOMPurify from "dompurify"; // 서버로 날릴 HTML의 보안 위협을 막기 위해
 
+
+import PostRequestWithAccessToken from "../api/axios/requestWithAccessToken";
 import request from "../api/axios/request";
+
+import { useSelector } from "react-redux";
 
 const PostTemp = () => {
   // 에디터 상태를 관리 (초기값은 빈 에디터 상태)
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+
+      const token = useSelector(state => state.auth.accessToken);
 
   // 업로드한 이미지 파일 목록을 상태로 관리, 각 아이템은 {file, localUrl} 객체 형태
   const [imageFiles, setImageFiles] = useState([]);
@@ -136,8 +143,10 @@ function sanitizeHtmlWithImageFilter(dirtyHtml) {
 
       console.log("안전하게 변환된 HTML", imgFiltered);
 
-      let res = request.post('/post/draft', {'title' : '임시제목', 'content' : imgFiltered});
-console.log(res.data);
+      let res = await PostRequestWithAccessToken(token, '/post/draft', {'title' : document.getElementById("draft-title").value, 'content' : imgFiltered});
+
+      console.log(res.data);
+      
 
       // 완료 메시지 표시
       alert("글 작성이 완료되었습니다!");
@@ -186,6 +195,8 @@ console.log(res.data);
   return (
     <div style={{ maxWidth: 800, margin: "auto" }}>
       <h2>게시글 작성</h2>
+
+      <input id="draft-title"></input>
 
       {/* 에디터 컴포넌트 */}
       <Editor
@@ -310,7 +321,6 @@ console.log(res.data);
       >
         글 업로드
       </button>
-      <button onClick={() => {console.log(request.post('post/draft').data)}}>테스트</button>
     </div>
   );
 };

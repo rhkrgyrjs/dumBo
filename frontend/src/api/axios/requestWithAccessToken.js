@@ -1,20 +1,26 @@
 import axios from 'axios';
-import { getAccessToken } from '../token/accessToken';
+import authStore from '../../redux/authStore';
+import { useSelector } from 'react-redux';
 
-const requestWithAccessToken = axios.create(
+const axiosInstance = axios.create(
     {
         baseURL : process.env.REACT_APP_API_BASE_URL,
         headers : { 'Content-Type' : 'application/json' }
     }
 );
 
-requestWithAccessToken.interceptors.request.use(
-    (config) => 
-    {
-        const token = getAccessToken();
-        if (token !== null) { config.headers.Authorization = `Bearer ${token}`; }
-        return config;
-    }, (error) => Promise.reject(error)
-);
+async function PostRequestWithAccessToken(accessToken, api, data)
+{
+    axiosInstance.interceptors.request.use(
+        (config) => 
+        {
+            if (accessToken !== null) { config.headers.Authorization = `Bearer ${accessToken}`; }
+            return config;
+        }, (error) => Promise.reject(error)
+    );
 
-export default requestWithAccessToken;
+    return axiosInstance.post(api, data);
+}
+
+
+export default PostRequestWithAccessToken;
