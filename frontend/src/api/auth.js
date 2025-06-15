@@ -82,7 +82,7 @@ export async function nicknameCheck(nickname)
 {
     try
     {
-        let res = await request.post('/auth/signup/nicknameCheck', { 'nickname' : nickname });
+        let res = await request.get('/auth/signup/nickname-check', { params : { 'nickname' : nickname } });
         console.log(res.data.message);
         return res.data.useable;
     }
@@ -98,7 +98,7 @@ export async function emailCheck(email)
 {
     try
     {
-        let res = await request.post('/auth/signup/emailCheck', { 'email' : email });
+        let res = await request.get('/auth/signup/email-check', {params : { 'email' : email } });
         console.log(res.data.message);
         return res.data.useable;
     }

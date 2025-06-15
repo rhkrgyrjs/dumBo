@@ -2,11 +2,13 @@ com/dumbo/repository/dto/UserDTO.class
 com/dumbo/util/Bcrypt.class
 com/dumbo/config/RedisConfig.class
 com/dumbo/util/JWT.class
+com/dumbo/repository/dto/CursorResult.class
 com/dumbo/repository/db/UserDaoMyBatisService.class
 com/dumbo/config/AppConfig.class
 com/dumbo/controller/PostContoller.class
 com/dumbo/repository/db/PostDaoJdbcService.class
 com/dumbo/repository/db/DBConnectionMaker.class
+com/dumbo/repository/dto/ArticleDTO.class
 com/dumbo/config/DataSourceConfig.class
 com/dumbo/config/KafkaConfig.class
 com/dumbo/util/Redis.class

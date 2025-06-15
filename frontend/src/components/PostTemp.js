@@ -143,7 +143,7 @@ function sanitizeHtmlWithImageFilter(dirtyHtml) {
 
       console.log("안전하게 변환된 HTML", imgFiltered);
 
-      let res = await PostRequestWithAccessToken(token, '/post/draft', {'title' : document.getElementById("draft-title").value, 'content' : imgFiltered});
+      let res = await PostRequestWithAccessToken(token, '/post', {'title' : document.getElementById("draft-title").value, 'content' : imgFiltered});
 
       console.log(res.data);
       

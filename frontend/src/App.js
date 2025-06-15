@@ -6,6 +6,9 @@ import { useEffect } from 'react';
 import { requestTokenPair } from './api/auth';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from './redux/authSlice';
+import ArticleTest from './postTest/ArticleTest';
+import ScrollTest from './components/ScrollTest';
+import ArticleFeedTest from './components/ArticleFeedTest';
 
 function App() 
 {
@@ -29,7 +32,7 @@ function App()
     <div>
       <Modals />
       <Header />
-      <PostTemp />
+      <ArticleTest />
     </div>
   );
 }

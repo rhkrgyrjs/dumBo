@@ -35,6 +35,9 @@
       },
       "views": {
         "type": "integer"
+      },
+      "likes": {
+        "type": "integer"
       }
     }
   }

@@ -1,0 +1,31 @@
+POST
+ - /auth/login
+ - /auth/logout
+ - /auth/reissue
+ - /auth/signup
+ - /post (글 작성)
+ - /comment (댓글 작성)
+ - /image/upload [CORS : 프론트엔드]
+ - /reaction/post/{postId} --> 좋아요/싫어요의 적용은 Kafka로, 카운트는 Elasticsearch에 저장, post | post/previews GET에서 함께 리턴받아야 함. 좋아요 눌렀는지 여부는 RDBMS에 저장. UX를 고려, 누르면 클라이언트에서는 바로 +1해 보여줌
+ - /reaction/comment/{commentId}
+
+GET
+ - /auth/check-nickname
+ - /auth/check-email
+ - /post/{postId} (글 조회) --> 엮인 댓글과 대댓글 같이 리턴해야 함. 댓글/대댓글은 한번에 n개만 리턴하고, 더보기 버튼을 눌러 더 요청하는 식으로(limit/offset)
+ - /post/previews (글 미리보기 묶음 조회, 무한 스크롤 -> limit/offset)
+ - /comment/{postId} --> 특정 게시글의 댓글 목록(limit/offset)
+ - /comment/{commentId}/replies --> 특정 댓글의 대댓글 목록 (limit/offset)
+ - /image/{imageId} [CORS : 프론트엔드]
+
+
+PATCH
+ - /auth/profile
+ - /post/{postId} (글 수정)
+ - /comment/{commentId} (댓글 수정) --> 댓글 수정 지원은 선택사항.
+
+DELETE
+ - /auth/withdrawal
+ - /post/{postId} (글 삭제)
+ - /comment/{commentId} (댓글 삭제)
+ - /image/{imageId} [CORS : 백엔드]

@@ -1,10 +1,8 @@
 package com.dumbo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -170,11 +168,25 @@ public class AuthController
         // 예외 발생(HTTP 401)시 재로그인 유도해야함
     }
 
-    // 회원가입 중 nickname 중복체크 API
-    @PostMapping("/signup/nicknameCheck")
-    public ResponseEntity<Map<String, Object>> nicknameCheck(@RequestBody Map<String, String> body)
+    // 회원가입 API
+    @PostMapping("/signup")
+    public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserDTO userDto)
     {
-        String nickname = body.get("nickname");
+        Map<String, String> response = new HashMap<>();
+        try {
+            userDao.createUser(userDto);
+            response.put("message", "회원가입 성공");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "회원가입 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 회원가입 중 nickname 중복체크 API
+    @GetMapping("/signup/nickname-check")
+    public ResponseEntity<Map<String, Object>> nicknameCheck(@RequestParam("nickname") String nickname)
+    {
         Map<String, Object> response = new HashMap<>();
         try {
             if (userDao.findUserByNickname(nickname) == null) {
@@ -194,10 +206,9 @@ public class AuthController
     }
 
     // 회원가입 중 email 중복체크 API
-    @PostMapping("/signup/emailCheck")
-    public ResponseEntity<Map<String, Object>> emailCheck(@RequestBody Map<String, String> body)
+    @GetMapping("/signup/email-check")
+    public ResponseEntity<Map<String, Object>> emailCheck(@RequestParam("email") String email)
     {
-        String email = body.get("email");
         Map<String, Object> response = new HashMap<>();
         try {
             if (userDao.findUserByEmail(email) == null) {
@@ -216,18 +227,8 @@ public class AuthController
         }
     }
 
-    // 회원가입 API
-    @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserDTO userDto)
-    {
-        Map<String, String> response = new HashMap<>();
-        try {
-            userDao.createUser(userDto);
-            response.put("message", "회원가입 성공");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "회원가입 실패: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
-        }
-    }
+    // Patch : 개인정보 수정하기
+    // DELETE : 회원탈퇴하기
+    // 메소드 만들어야 함
+
 }

@@ -5,9 +5,11 @@
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/config/KafkaConfig.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/dao/PostDao.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/config/DataSourceConfig.java
+/home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/dto/CursorResult.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/util/Redis.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/dto/UserDTO.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/entity/User.java
+/home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/dto/ArticleDTO.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/config/RedisConfig.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/db/UserDaoMyBatisService.java
 /home/hyogun/바탕화면/dumbo/backend/src/main/java/com/dumbo/repository/db/UserDaoJdbcService.java

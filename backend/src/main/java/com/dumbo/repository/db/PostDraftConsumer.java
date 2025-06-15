@@ -16,7 +16,7 @@ import co.elastic.clients.elasticsearch.core.IndexResponse;
 public class PostDraftConsumer 
 {
     @Autowired
-    private ElasticsearchClient elasticsearchClient;
+    private ElasticsearchClient esClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -33,7 +33,7 @@ public class PostDraftConsumer
         {
             Map<String, Object> articleMap = objectMapper.readValue(message, Map.class);
 
-            IndexResponse response = elasticsearchClient.index(i -> i
+            IndexResponse response = esClient.index(i -> i
             .index("posts")
             .id((String) articleMap.get("post_id"))
             .document(articleMap));
