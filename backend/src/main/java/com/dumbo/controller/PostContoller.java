@@ -93,8 +93,8 @@ public class PostContoller
 
     }
 
-    /*
 
+    /*
     @PatchMapping("/{postId}")
     public String getMethodName()//@RequestParam String param) 
     {

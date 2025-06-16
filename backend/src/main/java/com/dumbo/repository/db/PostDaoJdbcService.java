@@ -78,9 +78,10 @@ public class PostDaoJdbcService implements PostDao
             article.put("author_nickname", user.getNickname());
             article.put("title", postDto.getTitle());
             String sanitizedHtml = sanitizer.sanitizeHtml(postDto.getContent());
+            article.put("thumbnail_img_url", sanitizer.extractThumbnailImageUrl(sanitizedHtml));
             article.put("content_html", sanitizedHtml);
             article.put("content_text", sanitizer.extractText(sanitizedHtml));
-            article.put("created_at", Instant.now().getEpochSecond());//LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))); // 엘라스틱서치에서 가능하다면 '현재 시간'으로 대체하는 게 더 나을 듯?
+            article.put("created_at", Instant.now().getEpochSecond());
             article.put("updated_at", null);
             article.put("views", 0);
             article.put("likes", 0);

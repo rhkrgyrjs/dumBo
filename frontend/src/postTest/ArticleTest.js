@@ -1,55 +1,65 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PostCard from './PostCard';
+import { useDispatch } from 'react-redux';
+import { showModal } from '../redux/modalStackSlice';
 
-const PAGE_SIZE = 20;
-const MAX_POSTS = 40;
+const API_URL = 'http://localhost:8080/dumbo-backend/post';
 
 export default function ArticleTest() {
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(0);
-  const loadMoreRef = useRef();
-  const isLoadingRef = useRef(false);
+  const [cursor, setCursor] = useState(null); // { createdAt, postId }
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchPosts = useCallback(async (pageNum) => {
-    isLoadingRef.current = true;
+  const loadMoreRef = useRef(null);
 
-    // 여기에 실제 API 호출 로직 넣기
-    // 예: const res = await fetch(`/api/posts?offset=${pageNum * PAGE_SIZE}&limit=${PAGE_SIZE}`);
-    // const newPosts = await res.json();
+  const dispatch = useDispatch();
 
-    // 임시 더미 데이터 생성 (실제 API로 바꾸면 됨)
-    const newPosts = Array(PAGE_SIZE).fill(null).map((_, i) => {
-      const id = pageNum * PAGE_SIZE + i + 1;
-      return {
-        id: `post_${id}`,
-        nickname: `홍길동_${id}`,
-        title: `게시글 제목 ${id}`,
-        contentHtml: `<p>게시글 내용 예시 ${id}.</p>`,
-        thumbnailImage: 'https://via.placeholder.com/600x300',
-        comments: [],
-      };
-    });
+  const fetchPosts = useCallback(async () => {
+    if (isLoading || !hasMore) return;
 
-    setPosts((prev) => {
-      const combined = [...prev, ...newPosts];
-      if (combined.length > MAX_POSTS) {
-        // 오래된 게시글 10개 삭제 (가장 앞 10개)
-        return combined.slice(combined.length - MAX_POSTS);
+    setIsLoading(true);
+
+    try {
+      const params = new URLSearchParams();
+      if (cursor?.createdAt) params.append('createdAtCursor', cursor.createdAt);
+      if (cursor?.postId) params.append('postIdCursor', cursor.postId);
+      // 최신 글부터 보기이므로 reverse는 false 또는 생략
+
+      const res = await fetch(`${API_URL}?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch posts');
+
+      const json = await res.json();
+
+      setPosts((prev) => [...prev, ...json.data]);
+
+      setHasMore(json.hasMore);
+      if (json.hasMore) {
+        setCursor({
+          createdAt: json.nextCreatedAt,
+          postId: json.nextPostId,
+        });
       }
-      return combined;
-    });
+    } catch (error) {
+      console.error('게시글 로딩 오류:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cursor, hasMore, isLoading]);
 
-    isLoadingRef.current = false;
+  // 최초 로드
+  useEffect(() => {
+    fetchPosts();
   }, []);
 
-  // 무한 스크롤 감지
+  // IntersectionObserver로 무한 스크롤 트리거
   useEffect(() => {
     if (!loadMoreRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !isLoadingRef.current) {
-          setPage((prev) => prev + 1);
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          fetchPosts();
         }
       },
       { rootMargin: '200px' }
@@ -60,24 +70,43 @@ export default function ArticleTest() {
     return () => {
       if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
     };
-  }, []);
-
-  // page가 바뀔 때마다 게시글 fetch
-  useEffect(() => {
-    fetchPosts(page);
-  }, [page, fetchPosts]);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    setPage(0);
-  }, []);
+  }, [fetchPosts, hasMore, isLoading]);
 
   return (
-    <div className="max-w-xl mx-auto mt-10 px-4">
+    <div className="max-w-3xl mx-auto mt-10 px-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.post_id} post={post} />
       ))}
       <div ref={loadMoreRef} style={{ height: 1 }} />
+
+      {isLoading && (
+        <div className="flex justify-center py-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500" />
+        </div>
+      )}
+
+      {!hasMore && (
+        <div className="text-center text-gray-400 py-4">
+          모든 게시글을 불러왔습니다.
+        </div>
+      )}
+      {/* 글쓰기 버튼 - 고정 */}
+      <button
+        onClick={() => { dispatch(showModal('draft')); }}
+        className="
+          fixed
+          left-8
+          bottom-8
+          px-4
+          py-4
+        bg-indigo-500
+        text-2xl
+        rounded-full
+        shadow-lg
+        cursor-pointer
+        hover:bg-indigo-700">
+          🪶
+        </button>
     </div>
   );
 }

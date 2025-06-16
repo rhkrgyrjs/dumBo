@@ -17,6 +17,9 @@ public class ArticleDTO {
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("thumbnail_img_url")
+    private String thumbnailImgUrl;
+
     @JsonInclude(JsonInclude.Include.NON_NULL) // pure text는 검색용이라 리턴 안 해도 됨
     @JsonProperty("content_text")
     private String contentText;
@@ -40,6 +43,7 @@ public class ArticleDTO {
     public String getAuthorId() { return this.authorId; }
     public String getAuthorNickname() { return this.authorNickname; }
     public String getTitle() { return this.title; }
+    public String getThumbnailImgUrl() { return this.thumbnailImgUrl; }
     public String getContentText() { return this.contentText; }
     public String getContentHtml() { return this.contentHtml; }
     public Long getCreatedAt() { return this.createdAt; }
@@ -51,6 +55,7 @@ public class ArticleDTO {
     public void setAuthorId(String authorId) { this.authorId = authorId; }
     public void setAuthorNickname(String authorNickname) { this.authorNickname = authorNickname; }
     public void setTitle(String title) { this.title = title; }
+    public void setThumbnailImgUrl(String url) { this.thumbnailImgUrl = url; }
     public void setContentText(String contentText) { this.contentText = contentText; }
     public void setContentHtml(String contentHtml) { this.contentHtml = contentHtml; }
     public void setCreatedAt(Long createdAt) { this.createdAt = createdAt; }

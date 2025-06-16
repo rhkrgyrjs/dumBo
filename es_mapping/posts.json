@@ -25,6 +25,9 @@
         "type": "text",
         "analyzer": "standard"
       },
+      "thumbnail_image_url": {
+        "type": "keyword"
+      },
       "created_at": {
         "type": "date",
         "format": "epoch_second"

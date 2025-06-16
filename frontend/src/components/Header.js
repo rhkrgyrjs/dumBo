@@ -15,7 +15,7 @@ export default function Header()
     }
 
     return(
-        <header className=" bg-gray-100 shadow-sm p-4 border-b-2 border-gray-300 rounded">
+        <header className="sticky top-0 bg-gray-100 shadow-sm p-1 border-b-2 border-gray-300">
             <div className="flex justify-between items-center w-full">
                 {/* 로고 - 왼쪽에 딱 붙음 */}
                 <div className="text-xl font-bold">DumBo</div>
@@ -31,7 +31,7 @@ export default function Header()
                
                  (<div className="flex items-center space-x-4">
                     <h1 className="font-bold">{nickname}</h1>
-                    <button onClick={handleLogout} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+                    <button onClick={handleLogout} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700">
                     로그아웃
                     </button>
                 </div>) :  (<button onClick={() => { dispatch(showModal('login')); }} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700">
