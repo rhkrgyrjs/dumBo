@@ -85,7 +85,8 @@ const PostTemp = () => {
       const htmlContent = draftToHtml(rawContent);
       const imgFiltered = sanitizeHtmlWithImageFilter(htmlContent);
 
-      console.log("HTML", imgFiltered);
+      console.log("HTML");
+      console.log(imgFiltered);
 
       const res = await PostRequestWithAccessToken(token, "/post", {
         title: document.getElementById("draft-title").value,
