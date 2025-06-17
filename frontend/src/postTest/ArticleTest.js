@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PostCard from './PostCard';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { showModal } from '../redux/modalStackSlice';
 
 const API_URL = 'http://localhost:8080/dumbo-backend/post';
@@ -71,6 +71,23 @@ export default function ArticleTest() {
       if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
     };
   }, [fetchPosts, hasMore, isLoading]);
+
+    const modalStack = useSelector(state => state.modal.modalStack);
+    useEffect(() => {
+    if (modalStack.length > 0) {
+      // 모달 열림 → 스크롤 막기
+      document.body.style.overflow = 'hidden';
+    } else {
+      // 모달 닫힘 → 스크롤 원복
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup: 컴포넌트 언마운트 시 원복
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [modalStack.length]);
+
 
   return (
     <div className="max-w-3xl mx-auto mt-10 px-4">

@@ -1,12 +1,45 @@
 import React, { useState } from "react";
 import { Editor } from "react-draft-wysiwyg";
-import { EditorState, convertToRaw } from "draft-js";
+import { EditorState, convertToRaw, ContentBlock } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import DOMPurify from "dompurify";
 
 import PostRequestWithAccessToken from "../api/axios/requestWithAccessToken";
 import { useSelector } from "react-redux";
+
+// 이미지 렌더링용 컴포넌트
+function MediaComponent({ block, contentState }) {
+  const entityKey = block.getEntityAt(0);
+  if (!entityKey) return null;
+
+  const data = contentState.getEntity(entityKey).getData();
+
+  return (
+    <div>
+      <img
+        src={data.src}
+        alt={data.alt || ""}
+        style={{
+          height: data.height || "auto",
+          width: data.width || "100%",
+          maxWidth: "100%",
+        }}
+      />
+    </div>
+  );
+}
+
+// atomic 블록 감지 시 MediaComponent로 렌더링
+function imageBlockRenderer(contentBlock) {
+  if (contentBlock.getType() === "atomic") {
+    return {
+      component: MediaComponent,
+      editable: false,
+    };
+  }
+  return null;
+}
 
 const PostTemp = () => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
@@ -20,35 +53,38 @@ const PostTemp = () => {
   const uploadImageCallback = (file) => {
     const localUrl = URL.createObjectURL(file);
     setImageFiles((prev) => [...prev, { file, localUrl }]);
+
     return Promise.resolve({ data: { link: localUrl } });
   };
 
   const uploadImageToServer = async (file) => {
-    const formData = new FormData();
-    formData.append("image", file);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
 
-    const res = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const res = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!res.ok) throw new Error("이미지 업로드 실패");
+      if (!res.ok) throw new Error("이미지 업로드 실패");
 
-    const data = await res.json();
-    if (!data.url) throw new Error("서버에서 URL을 받지 못함");
+      const data = await res.json();
+      if (!data.url) throw new Error("서버에서 URL을 받지 못함");
 
-    return data.url;
+      return data.url;
+    } catch (error) {
+      console.error("uploadImageToServer error:", error);
+      throw error;
+    }
   };
 
   const allowedImageDomains = ["http://localhost:5000/uploads"];
-
   function sanitizeHtmlWithImageFilter(dirtyHtml) {
     DOMPurify.addHook("uponSanitizeElement", (node) => {
       if (node.tagName === "IMG") {
         const src = node.getAttribute("src") || "";
-        const allowed = allowedImageDomains.some((domain) =>
-          src.startsWith(domain)
-        );
+        const allowed = allowedImageDomains.some((domain) => src.startsWith(domain));
         if (!allowed) {
           node.parentNode && node.parentNode.removeChild(node);
         }
@@ -57,43 +93,52 @@ const PostTemp = () => {
 
     const cleanHtml = DOMPurify.sanitize(dirtyHtml);
     DOMPurify.removeAllHooks();
-
     return cleanHtml;
   }
 
   const handleSubmit = async () => {
     try {
       const contentState = editorState.getCurrentContent();
-      let rawContent = convertToRaw(contentState);
-      const entityMap = rawContent.entityMap;
-      const urlMap = {};
+      const rawContent = convertToRaw(contentState);
 
-      for (let key in entityMap) {
-        const entity = entityMap[key];
+      const filteredEntityMap = {};
+      for (const key in rawContent.entityMap) {
+        if (key !== null && key !== "null" && rawContent.entityMap[key]) {
+          filteredEntityMap[key] = rawContent.entityMap[key];
+        }
+      }
+
+      for (const key in filteredEntityMap) {
+        const entity = filteredEntityMap[key];
         if (entity.type === "IMAGE") {
           const localSrc = entity.data.src;
           const imgObj = imageFiles.find((img) => img.localUrl === localSrc);
-
           if (imgObj) {
             const serverUrl = await uploadImageToServer(imgObj.file);
-            urlMap[localSrc] = serverUrl;
-            entityMap[key].data.src = serverUrl;
+            filteredEntityMap[key] = {
+              ...entity,
+              data: {
+                ...entity.data,
+                src: serverUrl,
+              },
+            };
           }
         }
       }
 
-      const htmlContent = draftToHtml(rawContent);
-      const imgFiltered = sanitizeHtmlWithImageFilter(htmlContent);
+      const fixedRawContent = {
+        ...rawContent,
+        entityMap: filteredEntityMap,
+      };
 
-      console.log("HTML");
-      console.log(imgFiltered);
+      const htmlContent = draftToHtml(fixedRawContent);
+      const cleanHtml = sanitizeHtmlWithImageFilter(htmlContent);
+      const titleValue = document.getElementById("draft-title").value;
 
       const res = await PostRequestWithAccessToken(token, "/post", {
-        title: document.getElementById("draft-title").value,
-        content: imgFiltered,
+        title: titleValue,
+        content: cleanHtml,
       });
-
-      console.log("작성 완료:", res.data);
 
       alert("글 작성이 완료되었습니다!");
       setEditorState(EditorState.createEmpty());
@@ -106,76 +151,44 @@ const PostTemp = () => {
 
   return (
     <div className="flex flex-col w-full">
-      {/* 제목 입력창 */}
       <input
         id="draft-title"
         placeholder="제목을 입력하세요"
-        className="mb-3 p-2 border border-gray-300 rounded"
+        className="mb-3 p-2 border border-gray-300 rounded focus:border-indigo-300"
       />
 
-      {/* 에디터 */}
-      <div className="border rounded-md mb-4 h-[500px] flex flex-col">
+      <div className="border rounded-md mb-4 h-[590px] flex flex-col">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}
+          customBlockRenderFunc={imageBlockRenderer}
           wrapperClassName="flex flex-col h-full"
           toolbarClassName="!sticky top-0 z-10 bg-white mb-2"
           editorClassName="flex-1 overflow-y-auto px-2"
           toolbar={{
-            options: [ 
+            options: [
               "inline",
               "colorPicker",
+              "blockType",
               "list",
               "textAlign",
-              "emoji",
               "image",
-              "remove",
+              "emoji",
               "history",
-              "blockType",
               "fontFamily",
               "fontSize",
             ],
             inline: {
-              options: [
-                "bold",
-                "italic",
-                "underline",
-                "strikethrough",
-                "monospace",
-              ],
+              options: ["bold", "italic", "underline", "strikethrough"],
             },
-            blockType: {
-              options: [
-                "Normal",
-                "Blockquote",
-                "Code",
-              ],
-            },
-            fontSize: {
-              options: [
-                8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72, 96,
-              ],
-            },
+            blockType: { options: ["Normal", "Blockquote", "Code"] },
+            fontSize: { options: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36] },
             fontFamily: {
-              options: [
-                "Arial",
-                "Georgia",
-                "Impact",
-                "Tahoma",
-                "Times New Roman",
-                "Verdana",
-              ],
+              options: ["Arial", "Georgia", "Tahoma", "Times New Roman", "Verdana"],
             },
-            list: {
-              options: ["unordered", "ordered"],
-            },
-            textAlign: {
-              options: ["left", "center", "right", "justify"],
-            },
+            list: { options: ["unordered", "ordered"] },
+            textAlign: { options: ["left", "center", "right", "justify"] },
             colorPicker: {},
-            link: {
-              options: ["link", "unlink"],
-            },
             emoji: {},
             image: {
               uploadCallback: uploadImageCallback,
@@ -186,30 +199,19 @@ const PostTemp = () => {
               urlEnabled: false,
             },
             remove: {},
-            history: {
-              options: ["undo", "redo"],
-            },
+            history: { options: ["undo", "redo"] },
           }}
         />
       </div>
 
-      {/* 버튼 */}
       <div className="mt-auto flex justify-center">
-  <button
-    className="
-      px-2
-      py-2
-      bg-indigo-500
-      text-xl
-      rounded-full
-      cursor-pointer
-      hover:bg-indigo-700
-    "
-    onClick={handleSubmit}
-  >
-    🪶
-  </button>
-</div>
+        <button
+          className="px-2 py-2 bg-indigo-500 text-xl rounded-full cursor-pointer hover:bg-indigo-700"
+          onClick={handleSubmit}
+        >
+          🪶
+        </button>
+      </div>
     </div>
   );
 };

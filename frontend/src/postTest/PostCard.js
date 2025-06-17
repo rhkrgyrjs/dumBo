@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from './ui/card';
 import CommentsSection from './CommentsSection';
 
-
 // 날짜 포맷팅 함수
 function formatDateTime(timestamp) {
   if (!timestamp) return '';
@@ -67,9 +66,6 @@ function truncateHtmlSafely(html, maxLength) {
 }
 
 const COMMENTS_FIXED_HEIGHT = 384; // px
-const MAX_PREVIEW_HEIGHT = 200; // px - 미리보기 영역 최대 높이
-
-// (formatDateTime, truncateHtmlSafely 함수는 그대로 유지)
 
 export default function PostCard({ post }) {
   const [expanded, setExpanded] = useState(false);
@@ -79,6 +75,7 @@ export default function PostCard({ post }) {
   const [needsTruncation, setNeedsTruncation] = useState(false);
 
   const previewRef = useRef(null);
+  const fullContentRef = useRef(null);
 
   const {
     author_nickname: nickname,
@@ -94,8 +91,8 @@ export default function PostCard({ post }) {
   const updatedAt = updated_at !== null && updated_at !== undefined ? updated_at * 1000 : null;
   const isModified = updatedAt && updatedAt !== createdAt;
 
-  // 미리보기용 HTML: 이미지 태그 제거 (썸네일은 별도 영역에서 보여주므로)
-  const previewHtml = truncateHtmlSafely(contentHtml, 10000); // 글자 수로 임의 제한, 너무 길면 메모리 부담 있을 수 있음
+  // 미리보기용 HTML: 이미지 태그 제거
+  const previewHtml = truncateHtmlSafely(contentHtml, 10000);
 
   // 토글 함수
   function toggleExpanded() {
@@ -124,13 +121,49 @@ export default function PostCard({ post }) {
     }
   }, [showComments]);
 
-  // ** 핵심: 렌더링 후 미리보기 높이 체크해서 필요하면 더보기 표시 **
+  // 본문 미리보기 높이 체크 (이미지 제외한 부분)
   useEffect(() => {
     if (previewRef.current) {
       const height = previewRef.current.scrollHeight;
-      setNeedsTruncation(height > MAX_PREVIEW_HEIGHT);
+      setNeedsTruncation(height > 200);
     }
   }, [previewHtml]);
+
+  // 전체 본문(이미지 포함) 높이 체크 (이미지 로딩 완료 후)
+  useEffect(() => {
+    if (!fullContentRef.current) return;
+
+    const imgs = fullContentRef.current.querySelectorAll('img');
+    if (imgs.length === 0) {
+      // 이미지 없으면 바로 체크
+      setNeedsTruncation(fullContentRef.current.scrollHeight > 200);
+      return;
+    }
+
+    let loadedCount = 0;
+    const onLoadOrError = () => {
+      loadedCount += 1;
+      if (loadedCount === imgs.length) {
+        setNeedsTruncation(fullContentRef.current.scrollHeight > 200);
+      }
+    };
+
+    imgs.forEach((img) => {
+      if (img.complete) {
+        onLoadOrError();
+      } else {
+        img.addEventListener('load', onLoadOrError);
+        img.addEventListener('error', onLoadOrError);
+      }
+    });
+
+    return () => {
+      imgs.forEach((img) => {
+        img.removeEventListener('load', onLoadOrError);
+        img.removeEventListener('error', onLoadOrError);
+      });
+    };
+  }, [contentHtml]);
 
   return (
     <Card className="mb-6 transition-all duration-300">
@@ -147,7 +180,7 @@ export default function PostCard({ post }) {
 
         <h2 className="text-lg font-bold mb-2">{title}</h2>
 
-        {/* 썸네일은 접기 상태이고, 내용이 길 때만 보여줌 */}
+        {/* 썸네일 이미지는 접기 상태이고, 본문 길이가 길 때만 보여줌 */}
         {!expanded && needsTruncation && thumbnailImage && (
           <div className="flex justify-center mb-2">
             <img
@@ -159,31 +192,31 @@ export default function PostCard({ post }) {
         )}
 
         <div
-          className="prose prose-sm max-w-none text-gray-800 cursor-pointer select-text group"
+          className={`prose prose-sm max-w-none text-gray-800 cursor-pointer select-text group ${
+            !expanded && needsTruncation ? 'line-clamp-6' : ''
+          }`}
           onClick={toggleExpanded}
           title={needsTruncation ? (expanded ? '접기' : '더보기') : undefined}
           aria-expanded={expanded}
-          style={{
-            maxHeight: !expanded && needsTruncation ? MAX_PREVIEW_HEIGHT : 'none',
-            overflow: !expanded && needsTruncation ? 'hidden' : 'visible',
-          }}
+          ref={previewRef}
         >
           <div
-            ref={previewRef}
             dangerouslySetInnerHTML={{
               __html: expanded ? contentHtml : previewHtml,
             }}
           />
         </div>
 
-        {/* 더보기/접기 표시: 렌더링된 높이 기준으로 노출 */}
+        {/* 더보기/접기 표시 */}
         {needsTruncation && (
           <span
             onClick={onToggleClick}
             className="text-blue-500 ml-1 cursor-pointer group-hover:underline"
             role="button"
             tabIndex={0}
-            onKeyPress={(e) => { if (e.key === 'Enter') onToggleClick(e); }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') onToggleClick(e);
+            }}
           >
             {expanded ? '접기' : '... 더보기'}
           </span>
@@ -218,12 +251,17 @@ export default function PostCard({ post }) {
           aria-expanded={showComments}
         >
           {showComments && (
-            <CommentsSection
-              comments={comments}
-              onToggle={handleRepliesToggle}
-            />
+            <CommentsSection comments={comments} onToggle={handleRepliesToggle} />
           )}
         </div>
+
+        {/* 보이지 않는 전체 본문 렌더링 (이미지 포함) - 높이 측정 용도 */}
+        <div
+          ref={fullContentRef}
+          className="invisible absolute left-[-9999px] top-0 w-[calc(100%-2rem)] max-w-none"
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
+          aria-hidden="true"
+        />
       </CardContent>
     </Card>
   );
