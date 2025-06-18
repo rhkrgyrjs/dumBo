@@ -17,3 +17,8 @@ function postReply()
 {
     
 }
+
+function deletePost()
+{
+    
+}

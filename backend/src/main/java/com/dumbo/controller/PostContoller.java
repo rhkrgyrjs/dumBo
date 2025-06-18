@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import javax.validation.Valid;
 
+import org.elasticsearch.client.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,7 +77,7 @@ public class PostContoller
     {
         // 1. 게시글이 캐싱되어 있나 조회
         // 2. 게시글이 캐싱되어 있다면 캐싱된 게시글 리턴
-        // ------ 인기 게시글 캐싱은 나중에 구현
+        // ------ 인기 게시글 캐싱은 나중에 구현 : DAO에서 할 문제임
 
         // 3. 게시글이 캐싱되어 있지 않다면, Elasticsearch에 게시글 ID로 조회 요청
 
@@ -93,6 +94,31 @@ public class PostContoller
 
     }
 
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Object> deletePost(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @PathVariable String postId)
+    {
+        // 1. 요청에 액세스 토큰이 있나 확인
+        // 2. 요청에 엑세스 토큰이 없다면 요청 거절
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 없음"));
+        
+        // 3. 요청에 엑세스 토큰이 있다면, 유효한지 확인
+        
+
+        String accessToken = authorizationHeader.substring(7);
+        User user = jwt.validateAccessToken(accessToken); // 요청을 보낸 User의 정보
+        if (user == null) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 유효하지 않음"));
+
+        // 4. 액세스 토큰이 유효하다면, 접근하려는 자원의 주인 ID 확인
+        String authorId = postDao.getArticleByPostId(postId).getAuthorId();
+        // 5. 액세스 토큰이 유효하고, 접근하려는 자원의 주인임이 확인되었다면, 
+        if (!user.getId().equals(authorId)) return ResponseEntity.status(401).body(Map.of("message", "권한을 벗어난 요청(다른 사람의 글 삭제 시도)"));
+        // 6. 해당 글이 캐싱되어 있다면 캐싱된 글을 삭제하고, es에서 글 삭제 -> 캐싱 부분은 DAO에서 처리해야 할 문제
+        if (!postDao.deleteArticle(postId)) return ResponseEntity.status(500).body(Map.of("message", "글 삭제 과정 중 오류 발생"));
+        // 7. es에서 글 삭제 후, RDBMS에서 지우는 부분은 Kafka로 처리(지연 방지) -> kafka 처리도 DAO에서 해야 함 : 꼭 필요한가?에 대한 고민
+        // 8. 이후 응답
+        return ResponseEntity.ok(Map.of("message", "글 삭제됨)"));
+    }
+
 
     /*
     @PatchMapping("/{postId}")
@@ -101,10 +127,5 @@ public class PostContoller
         
     }
 
-    @DeleteMapping("/{postId}")
-    public String delete()
-    {
-
-    }
     */
 }

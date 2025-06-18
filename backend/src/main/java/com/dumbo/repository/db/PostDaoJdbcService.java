@@ -92,6 +92,61 @@ public class PostDaoJdbcService implements PostDao
             return post;
         }
     }
+    
+    // postId로 es에 저장된 게시글 하나 찾는 메소드
+    public ArticleDTO getArticleByPostId(String postId)
+    {
+        try 
+        {
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                                                .index("posts")
+                                                .query(q -> q.term(t -> t.field("post_id")
+                                                .value(FieldValue.of(postId))))
+                                                .size(1)
+                                                .build();
+
+            SearchResponse<ArticleDTO> response = esClient.search(searchRequest, ArticleDTO.class);
+            if (response.hits().hits().isEmpty()) return null; // 해당 postId의 게시글이 존재하지 않을 경우
+            return response.hits().hits().get(0).source();
+
+        } catch (IOException e) { return null; }
+    }
+
+    public boolean deleteArticle(String postId)
+    {
+        // 캐싱된 글 있다면 삭제 해야 함
+        // 글 캐싱은 구현중
+
+        String sql = "DELETE FROM posts WHERE es_id = ?";
+        // RDBMS에서 삭제
+        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, postId);
+            ps.executeUpdate();
+        } catch (SQLException e) { return false; }
+
+        try 
+        {
+            // 1) post_id로 문서 검색
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                                                .index("posts")
+                                                .query(q -> q.term(t -> t.field("post_id")
+                                                .value(FieldValue.of(postId))))
+                                                .size(1)
+                                                .build();
+
+            SearchResponse<ArticleDTO> searchResponse = esClient.search(searchRequest, ArticleDTO.class);
+
+            if (searchResponse.hits().hits().isEmpty()) return true; // 해당 postId의 게시글이 존재하지 않을 경우(이미 삭제됨)
+
+            String documentId = searchResponse.hits().hits().get(0).id();  // ES 문서 _id
+
+            // 2) ES 문서 삭제
+            var deleteResponse = esClient.delete(d -> d.index("posts").id(documentId));
+
+            return deleteResponse.result().name().equalsIgnoreCase("deleted");
+        } catch (IOException e) { return false; }
+    }
 
    public CursorResult getArticles(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 
    {

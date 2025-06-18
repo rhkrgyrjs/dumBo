@@ -11,7 +11,7 @@ public class Post
     @Id
     private String esId;
 
-    public void setEsId(String esId) { this.esId = esId; }
-
     public String getEsId() { return this.esId; }
+    
+    public void setEsId(String esId) { this.esId = esId; }
 }

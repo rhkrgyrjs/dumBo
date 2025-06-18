@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
+import { useSelector } from "react-redux";
+import PostRequestWithAccessToken from '../api/axios/requestWithAccessToken';
 
-export default function CommentsSection({ comments, onToggle }) {
+export default function CommentsSection({ comments, onToggle, postId, isLoading }) {
   const [newCommentText, setNewCommentText] = useState('');
+
+  const accessToken = useSelector(state => state.auth.accessToken);
+
+  const handleWriteComment = async () => 
+  {
+    let res = await PostRequestWithAccessToken(accessToken, "/comment/"+postId, { content: newCommentText });
+    console.log(res.data);
+  };
 
   return (
     <div
@@ -22,6 +32,7 @@ export default function CommentsSection({ comments, onToggle }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            handleWriteComment();
             // 현재는 제출 기능 없음
           }}
           className="flex items-center"

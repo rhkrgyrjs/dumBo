@@ -1,5 +1,4 @@
 import axios from 'axios';
-import authStore from '../../redux/authStore';
 import { useSelector } from 'react-redux';
 
 const axiosInstance = axios.create(
@@ -8,6 +7,20 @@ const axiosInstance = axios.create(
         headers : { 'Content-Type' : 'application/json' }
     }
 );
+
+
+export async function GetRequestWithAccessToken(accessToken, api, data)
+{
+    axiosInstance.interceptors.request.use(
+        (config) => 
+        {
+            if (accessToken !== null) { config.headers.Authorization = `Bearer ${accessToken}`; }
+            return config;
+        }, (error) => Promise.reject(error)
+    );
+
+    return axiosInstance.get(api, data);
+}
 
 async function PostRequestWithAccessToken(accessToken, api, data)
 {
@@ -20,6 +33,19 @@ async function PostRequestWithAccessToken(accessToken, api, data)
     );
 
     return axiosInstance.post(api, data);
+}
+
+export async function DeleteRequestWithAccessToekn(accessToken, api)
+{
+    axiosInstance.interceptors.request.use(
+        (config) => 
+        {
+            if (accessToken !== null) { config.headers.Authorization = `Bearer ${accessToken}`; }
+            return config;
+        }, (error) => Promise.reject(error)
+    );
+
+    return axiosInstance.delete(api);
 }
 
 
