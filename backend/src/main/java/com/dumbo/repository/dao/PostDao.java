@@ -18,5 +18,5 @@ public interface PostDao
     public Post createArticle(User user, PostDTO postDto) throws SQLException, JsonProcessingException;
     public ArticleDTO getArticleByPostId(String postId);
     public boolean deleteArticle(String postId);
-    public CursorResult getArticles(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException;
+    public CursorResult<ArticleDTO> getArticleFeed(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException;
 }

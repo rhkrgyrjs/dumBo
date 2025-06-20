@@ -31,6 +31,7 @@ CREATE TABLE `comments` (
   `content` varchar(1000) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT NULL,
+  `reply_count` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `reply_to` (`reply_to`),
@@ -108,4 +109,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-18 22:33:02
+-- Dump completed on 2025-06-20 22:59:03

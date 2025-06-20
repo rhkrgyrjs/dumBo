@@ -193,7 +193,7 @@ export default function PostCard({ post }) {
       setIsLoadingComments(true);
       try {
         const res = await GetRequestWithAccessToken(accessToken, `/comment/${postId}`);
-        setComments(res.data.comments || []);
+        setComments(res.data.data || []);
         setCommentsLoaded(true);
       } catch (e) {
         console.error("댓글 불러오기 실패", e);

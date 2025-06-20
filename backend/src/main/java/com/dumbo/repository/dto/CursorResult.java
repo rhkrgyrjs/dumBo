@@ -2,50 +2,33 @@ package com.dumbo.repository.dto;
 
 import java.util.List;
 
-public class CursorResult {
-    private List<ArticleDTO> data;
+// 게시글 정보, 댓글 정보, 답글(댓글에 대한 댓글) 정보를 담아 리턴 -> 제네릭으로 구현
+// 커서 기반 페이징을 구현하기 위해 ID, 생성일자, 다음 항목 유무를 저장하고 리턴하는 기능 구현
+
+public class CursorResult<T> 
+{
+    private List<T> data;
     private Long nextCreatedAt;
-    private String nextPostId;
+    private String id;
     private boolean hasMore;
 
     public CursorResult() {}
 
-    public CursorResult(List<ArticleDTO> data, Long nextCreatedAt, String nextPostId, boolean hasMore) {
+    public CursorResult(List<T> data, Long nextCreatedAt, String id, boolean hasMore) 
+    {
         this.data = data;
         this.nextCreatedAt = nextCreatedAt;
-        this.nextPostId = nextPostId;
+        this.id = id;
         this.hasMore = hasMore;
     }
 
-    public List<ArticleDTO> getData() {
-        return data;
-    }
+    public List<T> getData() { return data; }
+    public Long getNextCreatedAt() { return nextCreatedAt; }
+    public String getId() { return id; }
+    public boolean getHasMore() { return hasMore; }
 
-    public void setData(List<ArticleDTO> data) {
-        this.data = data;
-    }
-
-    public Long getNextCreatedAt() {
-        return nextCreatedAt;
-    }
-
-    public void setNextCreatedAt(Long nextCreatedAt) {
-        this.nextCreatedAt = nextCreatedAt;
-    }
-
-    public String getNextPostId() {
-        return nextPostId;
-    }
-
-    public void setNextPostId(String nextPostId) {
-        this.nextPostId = nextPostId;
-    }
-
-    public boolean isHasMore() {
-        return hasMore;
-    }
-
-    public void setHasMore(boolean hasMore) {
-        this.hasMore = hasMore;
-    }
+    public void setData(List<T> data) { this.data = data; }
+    public void setNextCreatedAt(Long nextCreatedAt) { this.nextCreatedAt = nextCreatedAt; }
+    public void setId(String id) { this.id = id; }
+    public void setHasMore(boolean hasMore) { this.hasMore = hasMore; }
 }

@@ -148,7 +148,7 @@ public class PostDaoJdbcService implements PostDao
         } catch (IOException e) { return false; }
     }
 
-   public CursorResult getArticles(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 
+   public CursorResult<ArticleDTO> getArticleFeed(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 
    {
         SearchRequest.Builder searchBuilder = new SearchRequest.Builder()
             .index("posts")
@@ -189,7 +189,7 @@ public class PostDaoJdbcService implements PostDao
 
         boolean hasMore = response.hits().hits().size() == limit;
 
-        return new CursorResult(articles, nextCreatedAt, nextPostId, hasMore);
+        return new CursorResult<ArticleDTO>(articles, nextCreatedAt, nextPostId, hasMore);
     }
 
 

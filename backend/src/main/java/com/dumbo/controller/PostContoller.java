@@ -81,14 +81,8 @@ public class PostContoller
 
         // 3. 게시글이 캐싱되어 있지 않다면, Elasticsearch에 게시글 ID로 조회 요청
 
-        try
-        {
-            return ResponseEntity.ok(postDao.getArticles(createdAtCursor, postIdCursor, 20, reverse)); // 20개만
-        }
-        catch (IOException e)
-        {
-            return ResponseEntity.status(500).body(Map.of("message", "게시글 조회 실패"));
-        }
+        try { return ResponseEntity.ok(postDao.getArticleFeed(createdAtCursor, postIdCursor, 20, reverse)); } // 20개만
+        catch (IOException e) { return ResponseEntity.status(500).body(Map.of("message", "게시글 조회 실패" + e.getMessage())); }
         
         // 4. 조회된 정보 리턴, 댓글은 클라이언트가 다시 요청해야 함.
 

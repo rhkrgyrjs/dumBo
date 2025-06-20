@@ -19,6 +19,7 @@ public class Comment
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer replyCount;
 
     public String getId() { return this.id; }
     public String getPostId() { return this.postId; }
@@ -28,6 +29,7 @@ public class Comment
     public String getContent() { return this.content; }
     public LocalDateTime getCreatedAt() { return this.createdAt; }
     public LocalDateTime getUpdatedAt() { return this.updatedAt; }
+    public Integer getReplyCount() { return this.replyCount; }
 
     public void setId(String commentId) { this.id = commentId; }
     public void setPostId(String postId) { this.postId = postId; }
@@ -37,4 +39,5 @@ public class Comment
     public void setContent(String content) { this.content = content; }
     public void setCreatedAt(LocalDateTime createdAt ) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setReplyCount(Integer count) { this.replyCount = count; }
 }

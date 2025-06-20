@@ -10,10 +10,12 @@ import com.dumbo.repository.dto.ArticleDTO;
 import com.dumbo.repository.entity.User;
 import com.dumbo.util.JWT;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +56,15 @@ public class CommentController
         // 3. 게시글이 존재하면, 댓글 추가하기
         if (commentDao.createComment(user, postId, body.get("content"))) return ResponseEntity.ok(Map.of("message", "댓글 작성 완료"));
         else return ResponseEntity.status(401).body(Map.of("message", "댓글 작성에 실패함"));
+    }
+
+    // 게시글에 작성된 댓글을 조회하는 API : 댓글 벌크로 리턴 : 커서 기반 페이징으로 구현하기
+    // 한번에 리턴할 댓글 갯수는 20개로 고정
+    @GetMapping("/{postId}")
+    public ResponseEntity<Object> fetchComment(@RequestParam(required = false) Long createdAtCursor, @RequestParam(required = false) String commentIdCursor, @RequestParam(defaultValue = "false") boolean reverse, @PathVariable String postId)
+    {
+        try { return ResponseEntity.ok(commentDao.getCommentFeed(postId, createdAtCursor, commentIdCursor, 20, reverse)); } // 20개만
+        catch (SQLException e) { return ResponseEntity.status(500).body(Map.of("message", "댓글 조회 실패")); }
     }
 
 }

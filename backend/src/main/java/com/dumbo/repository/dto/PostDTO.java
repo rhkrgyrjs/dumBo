@@ -1,5 +1,8 @@
 package com.dumbo.repository.dto;
 
+// 클라이언트 -> 서버로 글 작성(Post) 요청에 쓰이는 DTO
+// 단순히 유저가 작성한 글의 형식(글자 수 등)이 맞는지만 확인하는 용도
+
 public class PostDTO 
 {
 
