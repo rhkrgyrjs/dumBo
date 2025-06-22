@@ -112,7 +112,7 @@ public class PostDaoJdbcService implements PostDao
         } catch (IOException e) { return null; }
     }
 
-    public boolean deleteArticle(String postId)
+    public boolean deleteArticle(String postId) throws SQLException, IOException
     {
         // 캐싱된 글 있다면 삭제 해야 함
         // 글 캐싱은 구현중
@@ -123,7 +123,7 @@ public class PostDaoJdbcService implements PostDao
         {
             ps.setString(1, postId);
             ps.executeUpdate();
-        } catch (SQLException e) { return false; }
+        }
 
         try 
         {
@@ -145,7 +145,7 @@ public class PostDaoJdbcService implements PostDao
             var deleteResponse = esClient.delete(d -> d.index("posts").id(documentId));
 
             return deleteResponse.result().name().equalsIgnoreCase("deleted");
-        } catch (IOException e) { return false; }
+        } catch (IOException e) { throw e; }
     }
 
    public CursorResult<ArticleDTO> getArticleFeed(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 

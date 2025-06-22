@@ -30,6 +30,9 @@ public class KafkaConfig {
     @Value("${spring.kafka.consumer.post-draft-group-id}")
     private String postDraftGroupId;
 
+    @Value("${spring.kafka.consumer.reply-count-group-id}")
+    private String replyCountGroupId;
+
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -55,12 +58,23 @@ public class KafkaConfig {
 
     @Bean
     public ConsumerFactory<String, String> postDraftConsumerFactory() { return consumerFactory(postDraftGroupId); }
+    @Bean
+    public ConsumerFactory<String, String> replyCountConsumerFactory() { return consumerFactory(replyCountGroupId); }
+    
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> postDraftListenerContainerFactory() 
     {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory(postDraftGroupId));
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> replyCountListenerContainerFactory() 
+    {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory(replyCountGroupId));
         return factory;
     }
 }

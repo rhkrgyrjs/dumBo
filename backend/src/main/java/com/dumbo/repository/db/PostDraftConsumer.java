@@ -39,8 +39,5 @@ public class PostDraftConsumer
             .document(articleMap));
             // 여기에 엘라스틱서치에 게시글 저장하는 루틴 작성해야 할 듯?
         } catch (IOException e) { e.printStackTrace(); } // 여기에 카프카 동작 실패시 로깅
-
-        // JSON 파싱, Elasticsearch 저장 로직 등 구현
-        // 예) objectMapper.readValue(message, PostDTO.class)
     }
 }

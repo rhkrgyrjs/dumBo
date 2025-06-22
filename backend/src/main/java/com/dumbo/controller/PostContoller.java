@@ -1,6 +1,7 @@
 package com.dumbo.controller;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 import javax.validation.Valid;
@@ -107,10 +108,13 @@ public class PostContoller
         // 5. 액세스 토큰이 유효하고, 접근하려는 자원의 주인임이 확인되었다면, 
         if (!user.getId().equals(authorId)) return ResponseEntity.status(401).body(Map.of("message", "권한을 벗어난 요청(다른 사람의 글 삭제 시도)"));
         // 6. 해당 글이 캐싱되어 있다면 캐싱된 글을 삭제하고, es에서 글 삭제 -> 캐싱 부분은 DAO에서 처리해야 할 문제
-        if (!postDao.deleteArticle(postId)) return ResponseEntity.status(500).body(Map.of("message", "글 삭제 과정 중 오류 발생"));
+        try 
+        {
+            postDao.deleteArticle(postId); 
+        } catch (SQLException | IOException e) { return ResponseEntity.status(500).body(Map.of("message", "글 삭제 과정 중 오류 발생" + e.getMessage())); }
         // 7. es에서 글 삭제 후, RDBMS에서 지우는 부분은 Kafka로 처리(지연 방지) -> kafka 처리도 DAO에서 해야 함 : 꼭 필요한가?에 대한 고민
         // 8. 이후 응답
-        return ResponseEntity.ok(Map.of("message", "글 삭제됨)"));
+        return ResponseEntity.ok(Map.of("message", "글 삭제됨"));
     }
 
 

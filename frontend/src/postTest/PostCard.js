@@ -65,8 +65,9 @@ export default function PostCard({ post }) {
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const deleteTimeoutRef = useRef(null);
+  const [replyTo, setReplyTo] = useState(null); // ✅ 추가: 답글 상태
 
+  const deleteTimeoutRef = useRef(null);
   const previewRef = useRef(null);
   const fullContentRef = useRef(null);
 
@@ -322,6 +323,8 @@ export default function PostCard({ post }) {
               onToggle={handleRepliesToggle}
               postId={postId}
               isLoading={isLoadingComments}
+              replyTo={replyTo}           // ✅ 추가
+              setReplyTo={setReplyTo}     // ✅ 추가
             />
           )}
         </div>
