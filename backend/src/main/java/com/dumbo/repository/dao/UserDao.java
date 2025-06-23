@@ -2,9 +2,8 @@ package com.dumbo.repository.dao;
 
 import java.sql.SQLException;
 
-import com.dumbo.repository.dto.UserDTO;
-
-import com.dumbo.repository.entity.User;
+import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.entity.User;
 
 public interface UserDao
 {

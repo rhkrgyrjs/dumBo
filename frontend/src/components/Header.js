@@ -15,7 +15,7 @@ export default function Header()
     }
 
     return(
-        <header className="sticky top-0 bg-gray-100 shadow-sm p-1 border-b-2 border-gray-300">
+        <header className="sticky top-0 bg-gray-100 shadow-sm p-1 border-b-2 border-gray-300 z-10">
             <div className="flex justify-between items-center w-full">
                 {/* 로고 - 왼쪽에 딱 붙음 */}
                 <div className="text-xl font-bold">DumBo</div>

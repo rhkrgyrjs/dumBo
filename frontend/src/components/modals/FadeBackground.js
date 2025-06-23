@@ -6,6 +6,6 @@ export default function FadeBackground()
 
     return(
         <div
-          className={fadeBackground ? "fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-10" : ""}></div>
+          className={fadeBackground ? "fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-20" : ""}></div>
     );
 }

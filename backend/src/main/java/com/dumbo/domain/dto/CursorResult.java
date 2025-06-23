@@ -1,4 +1,4 @@
-package com.dumbo.repository.dto;
+package com.dumbo.domain.dto;
 
 import java.util.List;
 

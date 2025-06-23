@@ -1,5 +1,12 @@
 package com.dumbo.config;
 
+/*
+ * DataSourceConfig
+ * 
+ * RDBMS 연결을 javax.sql.DataSource 로 통일해서 받아오기 위한 설정 파일
+ * pplication.properties 의 설정값에 의존
+ */
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -7,22 +14,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
-// src/main/resources/application.properties 에서 설정값을 가져와, DriverManagerDataSource로 DB 커넥션을 가져옴
-// 사용하는 DB나 접속 방식이 바뀌어도 application.properties를 수정해 바꿀 수 있다.
 @Configuration
 @PropertySource("classpath:application.properties")
 public class DataSourceConfig 
 {
-    @Value("${spring.datasource.url}")
+    @Value("${dumbo.datasource.url}")
     private String url;
 
-    @Value("${spring.datasource.username}")
+    @Value("${dumbo.datasource.username}")
     private String username;
 
-    @Value("${spring.datasource.password}")
+    @Value("${dumbo.datasource.password}")
     private String password;
 
-    @Value("${spring.datasource.driver-class-name}")
+    @Value("${dumbo.datasource.driver-class-name}")
     private String driverClassName;
 
     @Bean

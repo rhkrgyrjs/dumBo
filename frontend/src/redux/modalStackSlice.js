@@ -31,13 +31,13 @@ const modalStackSlice = createSlice(
                 state.modalStack = state.modalStack.filter( (modal) => modal.modalName !== modalName);
 
                 // 만약 현재 열린 모달을 제외하고, 이전에 열린 모달(들)이 존재할 경우, z-index 처리와 fade 처리
-                for (let i=0; i < state.modalStack.length; i++) state.modalStack[i].setModalInfo({ 'fade' : true, 'z' : (i+2)*10 });
+                for (let i=0; i < state.modalStack.length; i++) state.modalStack[i].setModalInfo({ 'fade' : true, 'z' : (i+3)*10 });
 
                 // 스택에 모달 푸시
                 state.modalStack.push(state.modals[modalName]);
 
                 // 모달 z-index 처리와 fade 처리
-                state.modalStack[state.modalStack.length-1].setModalInfo({ 'fade' : false, 'z' : state.modalStack.length*10 })
+                state.modalStack[state.modalStack.length-1].setModalInfo({ 'fade' : false, 'z' : (state.modalStack.length+1)*10 })
 
                 // 뒷배경 블러처리
                 state.fadeBackground = true;
@@ -62,7 +62,7 @@ const modalStackSlice = createSlice(
                 topModal.modalClear();
                 
                 // 만약 열려 있던 모달이 있다면, 활성화시키기
-                if (state.modalStack.length > 0) state.modalStack[state.modalStack.length-1].setModalInfo({ 'fade' : false, 'z' : state.modalStack.length*10 });
+                if (state.modalStack.length > 0) state.modalStack[state.modalStack.length-1].setModalInfo({ 'fade' : false, 'z' : (state.modalStack.length+1)*10 });
                 // 만약 열려 있는 모달이 없을 경우, 뒷배경 블러처리 해제
                 else state.fadeBackground = false;
 

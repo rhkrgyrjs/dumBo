@@ -1,30 +1,34 @@
 package com.dumbo.config;
 
+/*
+ * JwtConfig
+ * 
+ * Jwt 토큰의 비밀 키, 액세스/리프레시 토큰의 유효 기간 설정 파일
+ * application.properties 의 설정값에 의존
+ */
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
-import java.util.Base64;
-
-import javax.crypto.SecretKey;
-
 import org.springframework.beans.factory.annotation.Value;
 
-import com.dumbo.util.JWT;
-
+import java.util.Base64;
+import javax.crypto.SecretKey;
 import io.jsonwebtoken.security.Keys;
+
+import com.dumbo.util.JWT;
 
 @Configuration
 @PropertySource("classpath:application.properties")
 public class JwtConfig 
 {
-    @Value("${jwt.base64-secret-key}")
+    @Value("${dumbo.jwt.base64-secret-key}")
     private String base64SecretKey;
 
-    @Value("${jwt.access-token-exp-time}")
+    @Value("${dumbo.jwt.access-token-exp-time}")
     private long accessTokenExpTime;
 
-    @Value("${jwt.refresh-token-exp-time}")
+    @Value("${dumbo.jwt.refresh-token-exp-time}")
     private long refreshTokenExpTime;
 
     @Bean

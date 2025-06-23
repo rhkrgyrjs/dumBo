@@ -1,17 +1,15 @@
 package com.dumbo.repository.dao;
 
-import com.dumbo.repository.entity.Post;
-import com.dumbo.repository.entity.User;
+import com.dumbo.domain.dto.ArticleDTO;
+import com.dumbo.domain.dto.CursorResult;
+import com.dumbo.domain.dto.PostDTO;
+import com.dumbo.domain.entity.Post;
+import com.dumbo.domain.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.io.IOException;
 import java.sql.SQLException;
-
-import com.dumbo.repository.dto.PostDTO;
-
 import java.util.List;
-import com.dumbo.repository.dto.ArticleDTO;
-import com.dumbo.repository.dto.CursorResult;
 
 public interface PostDao 
 {

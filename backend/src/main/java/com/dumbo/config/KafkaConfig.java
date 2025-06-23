@@ -24,13 +24,13 @@ import org.springframework.kafka.core.ProducerFactory;
 @PropertySource("classpath:application.properties")
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-server}")
+    @Value("${dumbo.kafka.bootstrap-server}")
     private String kafkaBootstarpServerUrl;
 
-    @Value("${spring.kafka.consumer.post-draft-group-id}")
+    @Value("${dumbo.kafka.consumer.post-draft-group-id}")
     private String postDraftGroupId;
 
-    @Value("${spring.kafka.consumer.reply-count-group-id}")
+    @Value("${dumbo.kafka.consumer.reply-count-group-id}")
     private String replyCountGroupId;
 
     @Bean
@@ -55,12 +55,6 @@ public class KafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(props);
     }
-
-    @Bean
-    public ConsumerFactory<String, String> postDraftConsumerFactory() { return consumerFactory(postDraftGroupId); }
-    @Bean
-    public ConsumerFactory<String, String> replyCountConsumerFactory() { return consumerFactory(replyCountGroupId); }
-    
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> postDraftListenerContainerFactory() 

@@ -15,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.dumbo.domain.dto.CommentDTO;
+import com.dumbo.domain.dto.CursorResult;
+import com.dumbo.domain.entity.Comment;
+import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.CommentDao;
-import com.dumbo.repository.dto.CommentDTO;
-import com.dumbo.repository.dto.CursorResult;
-import com.dumbo.repository.entity.Comment;
-
-import com.dumbo.repository.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

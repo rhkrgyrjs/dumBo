@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.UserDao;
-import com.dumbo.repository.dto.UserDTO;
-import com.dumbo.repository.entity.User;
 import com.dumbo.util.Bcrypt;
 
 @Repository

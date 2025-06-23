@@ -37,7 +37,7 @@
         if (json.hasMore) {
           setCursor({
             createdAt: json.nextCreatedAt,
-            postId: json.nextPostId,
+            postId: json.id,
           });
         }
       } catch (error) {

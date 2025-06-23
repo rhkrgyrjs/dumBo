@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.UserDao;
-import com.dumbo.repository.entity.User;
+import com.dumbo.repository.redis.Redis;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;

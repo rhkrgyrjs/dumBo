@@ -12,11 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.dumbo.domain.dto.ArticleDTO;
+import com.dumbo.domain.dto.CursorResult;
+import com.dumbo.domain.dto.PostDTO;
+import com.dumbo.domain.entity.Post;
+import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.PostDao;
-import com.dumbo.repository.dto.PostDTO;
-import com.dumbo.repository.entity.Post;
-import com.dumbo.repository.entity.User;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -39,8 +40,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.List;
 
-import com.dumbo.repository.dto.ArticleDTO;
-import com.dumbo.repository.dto.CursorResult;
 import com.dumbo.util.HtmlSanitizer;
 
 @Repository

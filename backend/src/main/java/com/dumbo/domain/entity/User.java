@@ -1,4 +1,4 @@
-package com.dumbo.repository.entity;
+package com.dumbo.domain.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

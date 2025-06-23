@@ -6,7 +6,8 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import DOMPurify from "dompurify";
 
 import PostRequestWithAccessToken from "../api/axios/requestWithAccessToken";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { popModal, showModal } from "../redux/modalStackSlice";
 
 // 이미지 렌더링용 컴포넌트
 function MediaComponent({ block, contentState }) {
@@ -41,10 +42,13 @@ function imageBlockRenderer(contentBlock) {
   return null;
 }
 
-const PostTemp = () => {
+const PostTemp = ({ z }) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [imageFiles, setImageFiles] = useState([]);
+
   const token = useSelector((state) => state.auth.accessToken);
+
+  const dispatch = useDispatch();
 
   const onEditorStateChange = (state) => {
     setEditorState(state);
@@ -97,6 +101,11 @@ const PostTemp = () => {
   }
 
   const handleSubmit = async () => {
+    if (token === null)
+    {
+      dispatch(showModal("login"));
+      return;
+    }
     try {
       const contentState = editorState.getCurrentContent();
       const rawContent = convertToRaw(contentState);
@@ -150,21 +159,21 @@ const PostTemp = () => {
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className={`flex flex-col w-full z-${z}`}>
       <input
         id="draft-title"
         placeholder="제목을 입력하세요"
-        className="mb-3 p-2 border border-gray-300 rounded focus:border-indigo-300"
+        className={`mb-3 p-2 border border-gray-300 rounded focus:border-indigo-300 z-${z}`}
       />
 
-      <div className="border rounded-md mb-4 h-[590px] flex flex-col">
+      <div className={`border rounded-md mb-4 h-[590px] flex flex-col z-${z}`}>
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}
           customBlockRenderFunc={imageBlockRenderer}
-          wrapperClassName="flex flex-col h-full"
-          toolbarClassName="!sticky top-0 z-10 bg-white mb-2"
-          editorClassName="flex-1 overflow-y-auto px-2"
+          wrapperClassName={`flex flex-col h-full z-${z}`}
+          toolbarClassName={`!sticky top-0 z-${z} bg-white mb-2`}
+          editorClassName={`flex-1 overflow-y-auto px-2 z-${z}`}
           toolbar={{
             options: [
               "inline",

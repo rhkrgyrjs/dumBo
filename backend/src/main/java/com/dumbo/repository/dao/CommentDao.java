@@ -4,10 +4,10 @@ import java.sql.SQLException;
 
 import org.apache.kafka.common.message.DescribeTopicPartitionsRequestData.Cursor;
 
-import com.dumbo.repository.dto.CommentDTO;
-import com.dumbo.repository.dto.CursorResult;
-import com.dumbo.repository.entity.Comment;
-import com.dumbo.repository.entity.User;
+import com.dumbo.domain.dto.CommentDTO;
+import com.dumbo.domain.dto.CursorResult;
+import com.dumbo.domain.entity.Comment;
+import com.dumbo.domain.entity.User;
 
 public interface CommentDao 
 {
