@@ -1,0 +1,47 @@
+{
+  "mappings": {
+    "properties": {
+      "post_id": {
+        "type": "keyword"
+      },
+      "author_id": {
+        "type": "keyword"
+      },
+      "author_nickname": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "standard"
+      },
+      "content_html": {
+        "type": "text",
+        "index": false
+      },
+      "content_text": {
+        "type": "text",
+        "analyzer": "standard"
+      },
+      "thumbnail_image_url": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date",
+        "format": "epoch_second"
+      },
+      "updated_at": {
+        "type": "date",
+        "format": "epoch_second"
+      },
+      "views": {
+        "type": "integer"
+      },
+      "likes": {
+        "type": "integer"
+      }
+    }
+  }
+}
