@@ -1,12 +1,7 @@
 package com.dumbo.controller;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-
 import javax.validation.Valid;
 
-import org.elasticsearch.client.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +11,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dumbo.domain.dto.ArticleDTO;
-import com.dumbo.domain.dto.CursorResult;
 import com.dumbo.domain.dto.PostDTO;
-import com.dumbo.domain.entity.Post;
 import com.dumbo.domain.entity.User;
-import com.dumbo.repository.dao.PostDao;
-import com.dumbo.util.JWT;
-
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import com.dumbo.service.auth.AuthService;
+import com.dumbo.service.post.PostService;
 
 import java.util.Map;
 
@@ -43,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PostContoller 
 {
     @Autowired
-    private JWT jwt;
+    private AuthService authServ;
 
     @Autowired
-    private PostDao postDao;
+    private PostService postServ;
 
     /**
      * 게시글 작성 API
@@ -68,27 +58,18 @@ public class PostContoller
      * { "message": <게시글 업로드 실패 사유> }
      */
     @PostMapping("")
-    public ResponseEntity<Map<String, Object>> post(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @Valid @RequestBody PostDTO postDto)
+    public ResponseEntity<Map<String, String>> post(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @Valid @RequestBody PostDTO postDto)
     {
-        // 1. 보낸 요청에 Access Token이 있는지 확인
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 없습니다."));
-        // 2. 없다면, 글 작성 실패 리턴. --> 비로그인(IP로 글 작성) 기능은 나중에 구현할 것임
-
-        String accessToken = authorizationHeader.substring(7);
-        // 3. Access Token이 있다면, 유효성 검증
-        User user = jwt.validateAccessToken(accessToken);
-        // 4. Access Token이 유효하다면, 액세스 토큰에 저장된 UserId 가져오기.
-        // 5. 유저의 정보를 담은 엔티티 받아오기
-        if (user == null) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 유효하지 않습니다."));
+        // 1. Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
         
-        // 6. RDBMS에 게시글 정보 생성하기 -> 엘라스틱서치, 카프카 요청은 DAO에서 함.
-        Post post = null;
-        try { post = postDao.createArticle(user, postDto); }
-        catch (Exception e) { return ResponseEntity.status(500).body(Map.of("message", "게시글 업로드 중 오류가 발생했습니다.")); }
-        if (post == null) return ResponseEntity.status(500).body(Map.of("message", "게시글 업로드에 실패했습니다."));
+        // 2. 게시글 업로드
+        postServ.createPost(user, postDto);
 
+        // 3. 성공 메시지 리턴
         return ResponseEntity.ok(Map.of("message", "게시글 업로드 요청에 성공했습니다."));
     }
+
 
     /**
      * 게시글 피드 요청 API
@@ -115,16 +96,10 @@ public class PostContoller
     @GetMapping("")
     public ResponseEntity<Object> getPost(@RequestParam(required = false) Long createdAtCursor, @RequestParam(required = false) String postIdCursor, @RequestParam(defaultValue = "false") boolean reverse)
     {
-        // 1. 게시글이 캐싱되어 있나 조회
-        // 2. 게시글이 캐싱되어 있다면 캐싱된 게시글 리턴
-        // ------ 인기 게시글 캐싱은 나중에 구현 : DAO에서 할 문제임
-
-        // 3. 게시글이 캐싱되어 있지 않다면, Elasticsearch에 게시글 ID로 조회 요청
-
-        try { return ResponseEntity.ok(postDao.getArticleFeed(createdAtCursor, postIdCursor, 20, reverse)); } // 일단은 20개만
-        catch (IOException e) { return ResponseEntity.status(500).body(Map.of("message", "게시글 피드 조회에 실패했습니다.")); }
-        // 4. 조회된 정보 리턴, 댓글은 클라이언트가 다시 요청해야 함.
+        // 1. 피드 조회해서 리턴
+        return ResponseEntity.ok(postServ.getArticleFeed(createdAtCursor, postIdCursor, 20, reverse)); // 일단은 20개만
     }
+
 
     /**
      * 게시글 삭제 요청 API
@@ -143,27 +118,13 @@ public class PostContoller
     @DeleteMapping("/{postId}")
     public ResponseEntity<Object> deletePost(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @PathVariable String postId)
     {
-        // 1. 요청에 액세스 토큰이 있나 확인
-        // 2. 요청에 엑세스 토큰이 없다면 요청 거절
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 없습니다."));
-        
-        // 3. 요청에 엑세스 토큰이 있다면, 유효한지 확인
-        String accessToken = authorizationHeader.substring(7);
-        User user = jwt.validateAccessToken(accessToken); // 요청을 보낸 User의 정보
-        if (user == null) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 유효하지 않습니다."));
+        // 1. Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
 
-        // 4. 액세스 토큰이 유효하다면, 접근하려는 자원의 주인 ID 확인
-        String authorId = postDao.getArticleByPostId(postId).getAuthorId();
-        // 5. 액세스 토큰이 유효하고, 접근하려는 자원의 주인임이 확인되었다면, 
-        if (!user.getId().equals(authorId)) return ResponseEntity.status(401).body(Map.of("message", "권한을 벗어난 요청입니다."));
-        // 6. 해당 글이 캐싱되어 있다면 캐싱된 글을 삭제하고, es에서 글 삭제 -> 캐싱 부분은 DAO에서 처리해야 할 문제
-        try 
-        {
-            postDao.deleteArticle(postId); 
-        } 
-        catch (SQLException | IOException e) { return ResponseEntity.status(500).body(Map.of("message", "글 삭제 과정 중 오류가 발생했습니다.")); }
-        // 7. es에서 글 삭제 후, RDBMS에서 지우는 부분은 Kafka로 처리(지연 방지) -> kafka 처리도 DAO에서 해야 함 : 꼭 필요한가?에 대한 고민
-        // 8. 이후 응답
+        // 2. 글 삭제
+        postServ.deletePost(user, postId);
+
+        // 3. 응답 리턴
         return ResponseEntity.ok(Map.of("message", "글 삭제 요청에 성공했습니다."));
     }
 

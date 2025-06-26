@@ -1,4 +1,4 @@
-package com.dumbo.config;
+package com.dumbo.exception.handler;
 
 /*
  * JsonfyDTO

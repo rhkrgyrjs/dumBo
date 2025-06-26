@@ -64,6 +64,13 @@ public class JWT
     .sameSite("Lax")
     .build()).toString();
 
+    public String extractSubjectIfValid(String token)
+    {
+        if (token == null) return null;
+        try { return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody().getSubject(); }
+        catch (JwtException e) { return null; }
+    }
+
     public User validateAccessToken(String accessToken)
     {
         if (accessToken == null) return null;

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 
 import com.dumbo.util.HtmlSanitizer;
+import com.dumbo.util.UUIDGenerator;
 
 @Repository
 public class PostDaoJdbcService implements PostDao
@@ -57,7 +59,79 @@ public class PostDaoJdbcService implements PostDao
     @Autowired
     private ElasticsearchClient esClient;
 
+    @Autowired
+    private UUIDGenerator uuidGenerator;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public String insertPostIdAndReturnId() throws SQLException
+    {
+        String sql = "INSERT INTO posts (es_id) VALUES (?)";
+        String uuid = uuidGenerator.generate();
+        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, uuid);
+            ps.executeUpdate();
+        }
+        return uuid;
+    }
+
+    public void pushPost(String postId, User user, PostDTO postDto) throws IOException
+    {
+        Map<String, Object> article = new HashMap<>();
+        article.put("post_id", postId);
+        article.put("author_id", user.getId());
+        article.put("author_nickname", user.getNickname());
+        article.put("title", postDto.getTitle());
+        String sanitizedHtml = sanitizer.sanitizeHtml(postDto.getContent());
+        article.put("thumbnail_img_url", sanitizer.extractThumbnailImageUrl(sanitizedHtml));
+        article.put("content_html", sanitizedHtml);
+        article.put("content_text", sanitizer.extractText(sanitizedHtml));
+        article.put("created_at", Instant.now().getEpochSecond());
+        article.put("updated_at", null);
+        article.put("views", 0);
+        article.put("likes", 0);
+        
+        esClient.index(i -> i.index("posts").id((String) article.get("post_id")).document(article));
+    }
+
+    public boolean existsById(String postId) throws SQLException, IOException
+    {
+        String sql = "SELECT es_id FROM posts WHERE es_id = ?";
+        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, postId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                String esId = rs.getString("es_id");
+                SearchRequest searchRequest = new SearchRequest.Builder().index("posts").query(q -> q.term(t -> t.field("post_id").value(FieldValue.of(esId)))).size(1).build();
+                SearchResponse<ArticleDTO> response = esClient.search(searchRequest, ArticleDTO.class);
+                return !response.hits().hits().isEmpty();
+            }
+            else return false;
+        }
+    }
+
+    public void deletePostId(String postId) throws SQLException
+    {
+        String sql = "DELETE FROM posts WHERE es_id = ?";
+        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, postId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void deletePostContent(String postId) throws IOException
+    {
+        SearchRequest searchRequest = new SearchRequest.Builder().index("posts").query(q -> q.term(t -> t.field("post_id").value(FieldValue.of(postId)))).size(1).build();
+        SearchResponse<ArticleDTO> searchResponse = esClient.search(searchRequest, ArticleDTO.class);
+        List<Hit<ArticleDTO>> hits = searchResponse.hits().hits();
+        if (hits.isEmpty()) return;
+        String documentId = hits.get(0).id();
+        esClient.delete(d -> d.index("posts").id(documentId));
+    }
 
     public Post createArticle(User user, PostDTO postDto) throws SQLException, JsonProcessingException
     {

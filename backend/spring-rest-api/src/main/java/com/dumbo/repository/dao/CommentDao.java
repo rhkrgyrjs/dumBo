@@ -15,7 +15,7 @@ public interface CommentDao
     public CursorResult<CommentDTO> getCommentFeed(String postId, Long createdAtCursor, String commentIdCursor, int limit, boolean reverse) throws SQLException;
     public Comment getCommentById(String commentId) throws SQLException;
 
-    public boolean createReply(User user, Comment comment, String postId, String content);
+    public void createReply(User user, Comment comment, String postId, String content) throws SQLException;
     public void incReplyCount(String commentId) throws SQLException;
     public CursorResult<CommentDTO> getReplysByComment(Comment comment, Long createdAtCursor, String replyIdCursor, int limit) throws SQLException;
 }

@@ -9,6 +9,8 @@ import com.dumbo.domain.entity.Comment;
 import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.CommentDao;
 import com.dumbo.repository.dao.PostDao;
+import com.dumbo.service.auth.AuthService;
+import com.dumbo.service.comment.CommentService;
 import com.dumbo.util.JWT;
 
 import java.sql.SQLException;
@@ -33,6 +35,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public class CommentController 
 {
     @Autowired
+    private AuthService authServ;
+
+    @Autowired
+    private CommentService commentServ;
+
+    @Autowired
     private JWT jwt;
 
     @Autowired
@@ -41,7 +49,6 @@ public class CommentController
     @Autowired
     private CommentDao commentDao;
 
-    // 댓글 작성하는 API
     /**
      * 댓글 작성 API
      * POST /comment/{postId}
@@ -60,25 +67,16 @@ public class CommentController
      * { "message": <댓글 작성 실패 사유> }
      */
     @PostMapping("/{postId}")
-    public ResponseEntity<Map<String, Object>> writeComment(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body, @PathVariable String postId)
+    public ResponseEntity<Map<String, String>> writeComment(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body, @PathVariable String postId)
     {
-        // 1. 액세스 토큰 확인하는 루틴
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 없습니다."));
-        String accessToken = authorizationHeader.substring(7);
-        // 3. Access Token이 있다면, 유효성 검증
-        User user = jwt.validateAccessToken(accessToken);
-        // 4. Access Token이 유효하다면, 액세스 토큰에 저장된 UserId 가져오기.
-        // 5. 유저의 정보를 담은 엔티티 받아오기
-        if (user == null) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 유효하지 않습니다."));
+        // Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
 
+        // 댓글 작성
+        commentServ.createComment(user, postId, body.get("content"));
 
-        // 2. 유효하면, 게시글이 존재하는지 확인
-        ArticleDTO post = postDao.getArticleByPostId(postId);
-        if (post == null) return ResponseEntity.status(401).body(Map.of("message", "해당 게시글을 찾을 수 없습니다."));
-
-        // 3. 게시글이 존재하면, 댓글 추가하기
-        if (commentDao.createComment(user, postId, body.get("content"))) return ResponseEntity.ok(Map.of("message", "댓글 작성에 성공했습니다."));
-        else return ResponseEntity.status(401).body(Map.of("message", "댓글 작성 중 오류가 발생했습니다."));
+        // 응답 리턴
+        return ResponseEntity.ok(Map.of("message", "댓글 작성에 성공했습니다."));
     }
 
     /**
@@ -105,8 +103,8 @@ public class CommentController
     @GetMapping("/{postId}")
     public ResponseEntity<Object> fetchComment(@RequestParam(required = false) Long createdAtCursor, @RequestParam(required = false) String commentIdCursor, @RequestParam(defaultValue = "false") boolean reverse, @PathVariable String postId)
     {
-        try { return ResponseEntity.ok(commentDao.getCommentFeed(postId, createdAtCursor, commentIdCursor, 20, reverse)); } // 20개만
-        catch (SQLException e) { return ResponseEntity.status(500).body(Map.of("message", "댓글 조회에 실패했습니다.")); }
+        // 1. 피드 조회해서 리턴
+        return ResponseEntity.ok(commentServ.getCommentFeed(postId, createdAtCursor, commentIdCursor, 20, reverse)); // 일단은 20개만
     }
 
     // 답글 작성하는 API
@@ -129,23 +127,14 @@ public class CommentController
     @PostMapping("/{postId}/{commentId}")
     public ResponseEntity<Map<String, Object>> writeReply(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body, @PathVariable String postId, @PathVariable String commentId)
     {
-        // 1. 액세스 토큰 확인하는 루틴
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 없음"));
-        String accessToken = authorizationHeader.substring(7);
-        // 2. 액세스 토큰이 있다면, 유효성 검증
-        User user = jwt.validateAccessToken(accessToken);
-        if (user == null) return ResponseEntity.status(401).body(Map.of("message", "액세스 토큰이 유효하지 않습니다."));
+        // Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
 
-        // 3. 액세스 토큰이 유효하면, 해당 댓글이 존재하는지 확인
-        try
-        {
-            Comment comment = commentDao.getCommentById(commentId);
-            if (comment == null) return ResponseEntity.status(401).body(Map.of("message", "해당 댓글을 찾을 수 없습니다."));
-            if (comment.getReplyTo() != null) return ResponseEntity.status(401).body(Map.of("message", "답글에는 답글을 작성할 수 없습니다."));
+        // 답글 작성
+        commentServ.createReply(user, commentId, postId, body.get("content"));
 
-            if (commentDao.createReply(user, comment, postId, body.get("content"))) return ResponseEntity.ok(Map.of("message", "답글 작성에 성공했습니다."));
-            else return ResponseEntity.status(401).body(Map.of("message", "답글 작성에 실패했습니다."));
-        } catch (SQLException e) { return ResponseEntity.status(401).body(Map.of("message", "답글 작성 중 오류가 발생했습니다.")); }
+        // 응답 리턴
+        return ResponseEntity.ok(Map.of("message", "답글 작성에 성공했습니다."));
     }
 
     // 댓글에 작성된 답글을 조회하는 API : 답글 벌크로 리턴 : 커서 기반 페이징으로 구현하기
@@ -174,14 +163,10 @@ public class CommentController
     @GetMapping("/{postId}/{commentId}")
     public ResponseEntity<Object> fetchReply(@RequestParam(required = false) Long createdAtCursor, @RequestParam(required = false) String replyIdCursor, @PathVariable String postId, @PathVariable String commentId)
     {
-        try
-        {
-            // 해당 답글이 존재하는지 확인
-            Comment comment = commentDao.getCommentById(commentId);
-            if (comment == null) return ResponseEntity.status(401).body(Map.of("message", "해당 댓글을 찾을 수 없습니다."));
-            return ResponseEntity.ok(commentDao.getReplysByComment(comment, createdAtCursor, replyIdCursor, 20)); // 20개만
-        }
-        catch (SQLException e) { return ResponseEntity.status(500).body(Map.of("message", "답글 조회에 중 오류가 발생했습니다.")); }
+        // 1. 피드 조회해서 리턴
+        return ResponseEntity.ok(commentServ.getReplyFeed(postId, commentId, createdAtCursor, replyIdCursor, 20));
     }
+
+    
 
 }

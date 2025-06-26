@@ -140,9 +140,8 @@ public class CommentDaoJdbcService implements CommentDao
         }
     }
 
-    public boolean createReply(User user, Comment comment, String postId, String content)
+    public void createReply(User user, Comment comment, String postId, String content) throws SQLException
     {
-        if (comment.getReplyTo() != null) return false;
         String sql = "INSERT INTO comments (post_id, reply_to, author_id, author_nickname, content) VALUES (?, ?, ?, ?, ?)";
         try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
@@ -152,13 +151,7 @@ public class CommentDaoJdbcService implements CommentDao
             ps.setString(4, user.getNickname());
             ps.setString(5, content);
             ps.executeUpdate();
-            
-            Map<String, String> replyedComment = new HashMap<>();
-            replyedComment.put("comment_id", comment.getId());
-            String jsonMessage = objectMapper.writeValueAsString(replyedComment);
-            kafkaTemplate.send("reply-count", jsonMessage);
-            return true;
-        } catch (SQLException | JsonProcessingException e) { return false; } // 예외 처리는 SQL/Json 나눠서 처리해야 하나?
+        }
     }
 
     public void incReplyCount(String commentId) throws SQLException
