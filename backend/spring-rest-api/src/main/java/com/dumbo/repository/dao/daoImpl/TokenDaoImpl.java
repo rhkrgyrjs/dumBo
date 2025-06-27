@@ -3,10 +3,12 @@ package com.dumbo.repository.dao.daoImpl;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.dumbo.repository.dao.TokenDao;
 import com.dumbo.repository.redis.Redis;
 
+@Repository
 public class TokenDaoImpl implements TokenDao
 {
     @Autowired
