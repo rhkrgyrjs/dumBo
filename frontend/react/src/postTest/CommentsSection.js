@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import PostRequestWithAccessToken from '../api/axios/requestWithAccessToken';
+import { ChevronDown } from "lucide-react"
 
 export default function CommentsSection({
   comments,
@@ -203,7 +204,7 @@ function CommentItem({ comment, onToggle, onReply, postId }) {
           type="button"
           disabled={loadingReplies}
         >
-          {loadingReplies ? '로딩 중...' : `└  답글 ${reply_count}개`}
+          {loadingReplies ? '로딩 중...' : (<><ChevronDown className="w-5 h-5 inline-block" />{` 답글 ${reply_count}개`}</>)}
         </button>
       )}
 
@@ -235,7 +236,7 @@ function CommentItem({ comment, onToggle, onReply, postId }) {
               disabled={loadingReplies}
               type="button"
             >
-              {loadingReplies ? '로딩 중...' : `+ 답글 ${remainingRepliesCount}개`}
+              {loadingReplies ? '로딩 중...' : (<><ChevronDown className="w-5 h-5 inline-block" />{` 답글 ${remainingRepliesCount}개`}</>)}
             </button>
           )}
 

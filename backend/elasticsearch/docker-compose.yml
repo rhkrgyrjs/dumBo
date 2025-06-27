@@ -7,11 +7,13 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - TZ=Asia/Seoul
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+      - /etc/localtime:/etc/localtime:ro
     restart: always
 
 volumes:

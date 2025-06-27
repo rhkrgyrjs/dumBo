@@ -10,10 +10,12 @@ services:
       MYSQL_USER: dumbo
       MYSQL_PASSWORD: zoo@123456
       MYSQL_DATABASE: dumbo
+      TZ: Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
 
 volumes:
   mysql_data:

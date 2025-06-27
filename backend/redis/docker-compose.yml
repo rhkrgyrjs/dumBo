@@ -9,6 +9,7 @@ services:
     command: ["redis-server", "--requirepass", "zoo@123456"]
     volumes:
       - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
     restart: always
 
 volumes:
