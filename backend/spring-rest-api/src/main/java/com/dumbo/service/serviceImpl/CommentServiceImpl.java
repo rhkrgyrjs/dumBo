@@ -1,6 +1,5 @@
-package com.dumbo.service.comment;
+package com.dumbo.service.serviceImpl;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,16 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dumbo.domain.dto.CommentDTO;
 import com.dumbo.domain.dto.CursorResult;
-import com.dumbo.domain.dto.PostDTO;
 import com.dumbo.domain.entity.Comment;
-import com.dumbo.domain.entity.Post;
 import com.dumbo.domain.entity.User;
 import com.dumbo.exception.CommentNotFoundException;
 import com.dumbo.exception.DatabaseReadException;
 import com.dumbo.exception.DatabaseWriteException;
 import com.dumbo.exception.PostNotFoundException;
 import com.dumbo.repository.dao.CommentDao;
-import com.dumbo.service.post.PostService;
+import com.dumbo.service.CommentService;
+import com.dumbo.service.PostService;
 
 @Service
 public class CommentServiceImpl implements CommentService
@@ -94,7 +92,7 @@ public class CommentServiceImpl implements CommentService
         catch (SQLException e) { throw new DatabaseReadException("댓글 정보를 불러오는 데 실패했습니다."); }
 
         // 답글 피드 생성
-        try { return commentDao.getReplysByComment(comment, createdAtCursor, replyIdCursor, limit); }
+        try { return commentDao.getRepliesByComment(comment, createdAtCursor, replyIdCursor, limit); }
         catch (SQLException e) { throw new DatabaseReadException("답글 피드 정보를 불러오는 데 실패했습니다."); }
     }
 

@@ -5,6 +5,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
+/**
+ * RDBMS dumbo.comments 테이블과 대응되는 Entity
+ */
 @Entity
 @Table(name = "comments")
 public class Comment 

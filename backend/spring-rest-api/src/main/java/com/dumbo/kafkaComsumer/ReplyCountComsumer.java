@@ -1,4 +1,4 @@
-package com.dumbo.repository.db;
+package com.dumbo.kafkaComsumer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.dumbo.repository.dao.CommentDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// 답글이 작성된 후 처리할 로직
+// 로직 분리로 인해 필요없어짐. 컨슈머 코드 저장용
 
 @Service
 public class ReplyCountComsumer 

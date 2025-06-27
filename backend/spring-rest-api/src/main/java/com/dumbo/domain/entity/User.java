@@ -6,6 +6,9 @@ import javax.persistence.Table;
 import javax.persistence.Column;
 import java.time.LocalDateTime;
 
+/**
+ * RDBMS dumbo.users 테이블과 대응되는 Entity
+ */
 @Entity
 @Table(name = "users")
 public class User 

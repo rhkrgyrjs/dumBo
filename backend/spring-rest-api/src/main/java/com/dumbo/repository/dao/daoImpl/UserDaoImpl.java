@@ -1,4 +1,4 @@
-package com.dumbo.repository.db;
+package com.dumbo.repository.dao.daoImpl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,10 +11,11 @@ import org.springframework.stereotype.Repository;
 import com.dumbo.domain.dto.UserDTO;
 import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.UserDao;
+import com.dumbo.repository.rdbms.DBConnectionMaker;
 import com.dumbo.util.Bcrypt;
 
 @Repository
-public class UserDaoJdbcService implements UserDao
+public class UserDaoImpl implements UserDao
 {
     @Autowired
     private DBConnectionMaker connectionMaker;

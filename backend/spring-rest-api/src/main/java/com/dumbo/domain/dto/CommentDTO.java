@@ -1,9 +1,10 @@
 package com.dumbo.domain.dto;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 유저 <-> 서버 댓글/답글 정보를 담는 DTO
+ */
 public class CommentDTO 
 {
     @JsonProperty("comment_id")

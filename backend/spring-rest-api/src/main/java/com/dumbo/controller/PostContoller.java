@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dumbo.domain.dto.PostDTO;
 import com.dumbo.domain.entity.User;
-import com.dumbo.service.auth.AuthService;
-import com.dumbo.service.post.PostService;
+import com.dumbo.service.AuthService;
+import com.dumbo.service.PostService;
 
 import java.util.Map;
 

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.dumbo.domain.dto.UserDTO;
-import com.dumbo.service.auth.AuthService;
+import com.dumbo.service.AuthService;
 
 /**
  * AuthController

@@ -2,6 +2,9 @@ package com.dumbo.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * 요청에 쿠키가 없을 때 발생하는 예외
+ */
 public class CookieNotFoundException extends DumboException
 {
     public CookieNotFoundException()

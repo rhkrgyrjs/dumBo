@@ -4,16 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dumbo.domain.dto.ArticleDTO;
-import com.dumbo.domain.entity.Comment;
 import com.dumbo.domain.entity.User;
-import com.dumbo.repository.dao.CommentDao;
-import com.dumbo.repository.dao.PostDao;
-import com.dumbo.service.auth.AuthService;
-import com.dumbo.service.comment.CommentService;
-import com.dumbo.util.JWT;
+import com.dumbo.service.AuthService;
+import com.dumbo.service.CommentService;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +33,6 @@ public class CommentController
 
     @Autowired
     private CommentService commentServ;
-
-    @Autowired
-    private JWT jwt;
-
-    @Autowired
-    private PostDao postDao;
-
-    @Autowired
-    private CommentDao commentDao;
 
     /**
      * 댓글 작성 API

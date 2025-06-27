@@ -2,9 +2,10 @@ package com.dumbo.domain.dto;
 
 import java.util.List;
 
-// 게시글 정보, 댓글 정보, 답글(댓글에 대한 댓글) 정보를 담아 리턴 -> 제네릭으로 구현
-// 커서 기반 페이징을 구현하기 위해 ID, 생성일자, 다음 항목 유무를 저장하고 리턴하는 기능 구현
-
+/**
+ * 서버 -> 유저 게시글/댓글/답글 정보를 벌크로 담기 위한 객체
+ * 커서 기반 페이징 구현을 위해 ID, 생성일자, 다음 항목 유무를 저장하고 리턴하는 기능 구현
+ */
 public class CursorResult<T> 
 {
     private List<T> data;

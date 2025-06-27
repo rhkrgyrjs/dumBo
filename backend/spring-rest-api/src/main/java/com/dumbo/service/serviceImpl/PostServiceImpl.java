@@ -1,4 +1,4 @@
-package com.dumbo.service.post;
+package com.dumbo.service.serviceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -17,6 +17,7 @@ import com.dumbo.exception.DatabaseWriteException;
 import com.dumbo.exception.ForbiddenActionException;
 import com.dumbo.exception.PostNotFoundException;
 import com.dumbo.repository.dao.PostDao;
+import com.dumbo.service.PostService;
 
 @Service
 public class PostServiceImpl implements PostService

@@ -3,8 +3,9 @@ package com.dumbo.domain.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-// 작성된 글을 서버 -> 유저에게 리턴하는데 사용되는 DTO(한 번 가공된)
-
+/**
+ * 유저 <-> 서버 작성된 게시글의 전체 정보를 담는 DTO
+ */
 public class ArticleDTO {
 
     @JsonProperty("post_id")

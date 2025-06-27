@@ -1,4 +1,4 @@
-package com.dumbo.service.auth;
+package com.dumbo.service.serviceImpl;
 
 
 import java.sql.SQLException;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.dumbo.domain.dto.UserDTO;
@@ -24,6 +23,7 @@ import com.dumbo.exception.MissingAccessTokenException;
 import com.dumbo.exception.RefreshTokenExpiredException;
 import com.dumbo.exception.UserNotFoundException;
 import com.dumbo.repository.dao.UserDao;
+import com.dumbo.service.AuthService;
 import com.dumbo.util.JWT;
 
 @Service

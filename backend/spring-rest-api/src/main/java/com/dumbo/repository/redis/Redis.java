@@ -4,8 +4,9 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 
-import java.util.Date;
-
+/**
+ * Redis(Lettuce) CRUD 기능 Mapper
+ */
 public class Redis 
 {
     private RedisClient redisClient;
@@ -20,23 +21,12 @@ public class Redis
         syncCommands = connection.sync();
     }
 
-    public void saveRefreshToken(String userId, String refreshToken, Date expDate)
+    public void set(String key, String value, long ttlSecond)
     {
-        String key = "RefreshToken:" + userId;
-        syncCommands.set(key, refreshToken);
-        long unixTimestampSeconds = expDate.getTime() / 1000;
-        syncCommands.expireat(key, unixTimestampSeconds);
+        syncCommands.set(key, value);
+        syncCommands.expireat(key, ttlSecond); // ms단위가 아닌 s(초) 단위
     }
 
-    public String getRefreshToken(String userId)
-    {
-        String key = "RefreshToken:" + userId;
-        return syncCommands.get(key); // 토큰 없으면 null 반환
-    }
-
-    public void deleteRefreshToken(String userId)
-    {
-        String key = "RefreshToken:" + userId;
-        syncCommands.del(key);
-    }
+    public String get(String key) { return syncCommands.get(key); }
+    public void delete(String key) { syncCommands.del(key); }
 }

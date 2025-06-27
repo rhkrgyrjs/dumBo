@@ -5,8 +5,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import com.dumbo.domain.entity.User;
+import com.dumbo.repository.dao.TokenDao;
 import com.dumbo.repository.dao.UserDao;
-import com.dumbo.repository.redis.Redis;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
@@ -42,7 +42,7 @@ public class JWT
     private final long REFRESH_TOKEN_EXP_TIME;
 
     @Autowired
-    private Redis redis;
+    private TokenDao tokenDao;
 
     @Autowired
     private UserDao userDao;
@@ -125,7 +125,7 @@ public class JWT
             String userId = claims.getSubject();
             // 2.1. 만약 만료시킨 토큰을 받았을 경우
             if (userId.equals("")) { return null; }
-            String storedToken = redis.getRefreshToken(userId);
+            String storedToken = tokenDao.getRefreshToken(userId);
 
             // 3. 받은 토큰이 Redis에 존재하는 토큰과 일치하는가?
             if (refreshToken.equals(storedToken)) return userId;
@@ -162,7 +162,7 @@ public class JWT
                                 .setExpiration(refreshTokenExpDate)
                                 .signWith(SECRET_KEY)
                                 .compact();
-        redis.saveRefreshToken(userId, refreshToken, refreshTokenExpDate);
+        tokenDao.saveRefreshToken(userId, refreshToken, refreshTokenExpDate);
 
         String accessToken = Jwts.builder()
                                 .setSubject(userId)
@@ -186,7 +186,7 @@ public class JWT
     }
 
     // 리프레시 토큰 Redis에서 삭제(로그아웃 요청 처리용)
-    public void invalidateRefreshToken(String userId) { redis.deleteRefreshToken(userId); }
+    public void invalidateRefreshToken(String userId) { tokenDao.deleteRefreshToken(userId); }
 
     public String getInvalidateRefreshTokenCookie() { return this.invalidateRefreshTokenCookie; }
 }

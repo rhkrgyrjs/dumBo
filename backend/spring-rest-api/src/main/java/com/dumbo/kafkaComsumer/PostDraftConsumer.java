@@ -1,4 +1,4 @@
-package com.dumbo.repository.db;
+package com.dumbo.kafkaComsumer;
 
 import java.io.IOException;
 import java.util.Map;
@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
+
+// 로직 분리로 인해 필요없어짐. 컨슈머 코드 저장용
 
 @Service
 public class PostDraftConsumer 

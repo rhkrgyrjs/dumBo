@@ -1,4 +1,4 @@
-package com.dumbo.repository.db;
+package com.dumbo.repository.dao.daoImpl;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,29 +15,20 @@ import org.springframework.stereotype.Repository;
 import com.dumbo.domain.dto.ArticleDTO;
 import com.dumbo.domain.dto.CursorResult;
 import com.dumbo.domain.dto.PostDTO;
-import com.dumbo.domain.entity.Post;
 import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.PostDao;
+import com.dumbo.repository.rdbms.DBConnectionMaker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import co.elastic.clients.json.JsonData;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.ZoneOffset;
 
 import java.time.Instant;
 
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -45,7 +36,7 @@ import com.dumbo.util.HtmlSanitizer;
 import com.dumbo.util.UUIDGenerator;
 
 @Repository
-public class PostDaoJdbcService implements PostDao
+public class PostDaoImpl implements PostDao
 {
     @Autowired
     private DBConnectionMaker connectionMaker;
@@ -54,15 +45,10 @@ public class PostDaoJdbcService implements PostDao
     private HtmlSanitizer sanitizer;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
-    @Autowired
     private ElasticsearchClient esClient;
 
     @Autowired
     private UUIDGenerator uuidGenerator;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String insertPostIdAndReturnId() throws SQLException
     {
@@ -133,6 +119,7 @@ public class PostDaoJdbcService implements PostDao
         esClient.delete(d -> d.index("posts").id(documentId));
     }
 
+    /*
     public Post createArticle(User user, PostDTO postDto) throws SQLException, JsonProcessingException
     {
         String sql = "INSERT INTO posts (es_id) VALUES (?)";
@@ -165,6 +152,7 @@ public class PostDaoJdbcService implements PostDao
             return post;
         }
     }
+    */
     
     // postId로 es에 저장된 게시글 하나 찾는 메소드
     public ArticleDTO getArticleByPostId(String postId)
@@ -185,6 +173,7 @@ public class PostDaoJdbcService implements PostDao
         } catch (IOException e) { return null; }
     }
 
+    /*
     public boolean deleteArticle(String postId) throws SQLException, IOException
     {
         // 캐싱된 글 있다면 삭제 해야 함
@@ -220,14 +209,15 @@ public class PostDaoJdbcService implements PostDao
             return deleteResponse.result().name().equalsIgnoreCase("deleted");
         } catch (IOException e) { throw e; }
     }
+    */
 
    public CursorResult<ArticleDTO> getArticleFeed(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 
    {
         SearchRequest.Builder searchBuilder = new SearchRequest.Builder()
             .index("posts")
             .size(limit)
-            .sort(s -> s.field(f -> f.field("created_at").order(SortOrder.Desc)))
-            .sort(s -> s.field(f -> f.field("post_id").order(SortOrder.Desc)))
+            .sort(s -> s.field(f -> f.field("created_at").order( (reverse ? SortOrder.Asc : SortOrder.Desc) )))
+            .sort(s -> s.field(f -> f.field("post_id").order( (reverse ? SortOrder.Asc : SortOrder.Desc) )))
             .source(src -> src.filter(f -> f.excludes("content_text")));
 
         // search_after 적용 (커서가 있으면)

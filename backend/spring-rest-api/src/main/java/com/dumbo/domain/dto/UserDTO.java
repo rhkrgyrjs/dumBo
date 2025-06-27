@@ -5,6 +5,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+/**
+ * 유저 -> 서버 회원가입 DTO
+ */
 public class UserDTO 
 {
     @NotBlank(message = "이메일은 필수입니다.")
