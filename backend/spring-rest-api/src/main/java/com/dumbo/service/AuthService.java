@@ -5,12 +5,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.dto.UserModifyDTO;
+import com.dumbo.domain.dto.UserRegisterDTO;
 import com.dumbo.domain.entity.User;
 import com.dumbo.exception.AccessTokenExpiredException;
+import com.dumbo.exception.BadRequestException;
 import com.dumbo.exception.CookieNotFoundException;
+import com.dumbo.exception.DatabaseDeleteException;
 import com.dumbo.exception.DatabaseReadException;
 import com.dumbo.exception.DatabaseWriteException;
+import com.dumbo.exception.ForbiddenActionException;
 import com.dumbo.exception.LoginFailedException;
 import com.dumbo.exception.MissingAccessTokenException;
 import com.dumbo.exception.RefreshTokenExpiredException;
@@ -83,7 +87,7 @@ public interface AuthService
      * 
      * @throws DatabaseWriteException RDBMS/Elasticsearch 쓰기 중 오류 발생
      */
-    public void signup(UserDTO userDto) throws DatabaseWriteException;
+    public void signup(UserRegisterDTO userDto) throws DatabaseWriteException;
 
     /**
      * 닉네임 중복체크 메소드
@@ -106,4 +110,17 @@ public interface AuthService
      * @throws DatabaseReadException RDBMS/Elasticsearch 읽기 중 오류 발생
      */
     public Map<String, Object> emailDupCheck(String email) throws DatabaseReadException;
+
+    /**
+     * 유저 정보 수정 메소드
+     * 
+     * @param user 정보를 수정할 유저
+     * @param userDto 수정할 정보
+     * 
+     * @throws BadRequestException 수정할 정보가 모두 null로 넘어온 경우
+     * @throws DatabaseWriteException RDBMS 쓰기 중 오류 발생
+     */
+    public void modifyUserInfo(User user, UserModifyDTO userDto) throws BadRequestException, DatabaseWriteException;
+
+    public void deleteUser(User user, String password) throws ForbiddenActionException, DatabaseReadException, DatabaseDeleteException;
 }

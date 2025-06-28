@@ -2,6 +2,7 @@
   import PostCard from './PostCard';
   import { useDispatch, useSelector } from 'react-redux';
   import { showModal } from '../redux/modalStackSlice';
+  import { DeleteRequestWithAccessToekn, DeleteRequestWithAccessTokenWithBody } from '../api/axios/requestWithAccessToken';
 
   const API_URL = 'http://localhost:8080/dumbo-backend/post';
 
@@ -90,6 +91,13 @@
       
     const isLoggedIn = useSelector(state => state.auth.accessToken);
 
+  async function resign()
+  {
+    let res = await DeleteRequestWithAccessTokenWithBody(isLoggedIn, "/auth/resign", { password:"Ss07241129!"});
+    console.log(res.data);
+    
+  }
+
     return (
       <div className="max-w-3xl mx-auto mt-10 px-4">
         {posts.map((post) => (
@@ -127,6 +135,22 @@
             🪶
           </button>
         }
+        <button
+          onClick={() => { resign(); }}
+          className="
+            fixed
+            left-100
+            bottom-8
+            px-10
+            py-4
+          bg-indigo-500
+          text-2xl
+          rounded-full
+          shadow-lg
+          cursor-pointer
+          hover:bg-indigo-700">
+            회원탈퇴테스트
+          </button>
       </div>
     );
   }

@@ -1,12 +1,8 @@
 {
   "mappings": {
     "properties": {
-      "post_id": {
-        "type": "keyword"
-      },
-      "author_id": {
-        "type": "keyword"
-      },
+      "post_id": { "type": "keyword" },
+      "author_id": { "type": "keyword" },
       "author_nickname": {
         "type": "text",
         "fields": {
@@ -28,6 +24,9 @@
       "thumbnail_image_url": {
         "type": "keyword"
       },
+      "imgs": {
+        "type": "keyword"
+      },
       "created_at": {
         "type": "date",
         "format": "epoch_second"
@@ -36,10 +35,10 @@
         "type": "date",
         "format": "epoch_second"
       },
-      "views": {
+      "likes": {
         "type": "integer"
       },
-      "likes": {
+      "dislikes": {
         "type": "integer"
       }
     }

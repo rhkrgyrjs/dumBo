@@ -7,6 +7,7 @@ import com.dumbo.domain.entity.User;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * 게시글과 관련된 CRUD 작업을 담당하는 DAO
@@ -45,11 +46,13 @@ public interface PostDao
      * RDBMS에 게시글의 ID 생성하는 메소드
      * 이후 본문은 Elasticsearch에 저장하는 과정을 거쳐야 정합성이 유지됨
      * 
+     * @param user 게시글 작성할 유저 정보
+     * 
      * @return 생성된 게시글 ID
      * 
      * @throws SQLException RDBMS 쓰기 작업 중 오류 발생할 경우
      */
-    public String insertPostIdAndReturnId() throws SQLException;
+    public String insertPostIdAndReturnId(User user) throws SQLException;
 
     /**
      * Elasticsearch에 게시글 정보 저장하는 메소드
@@ -93,4 +96,35 @@ public interface PostDao
      * @throws IOException Elasticsearch 삭제 작업 중 오류 발생할 경우
      */
     public void deletePostContent(String postId) throws IOException;
+
+    /**
+     * Elasticsearch에 저장된 특정 게시글에 포함된 모든 이미지의 이름들을 리턴하는 함수
+     * 
+     * @param postId 포함된 이미지의 이름을 가져올 게시글 ID
+     * 
+     * @return 이미지의 이름들
+     * 
+     * @throws IOException Elasticsearch 읽기 작업 중 오류 발생할 경우
+     */
+    public List<String> getImageNamesByPostId(String postId) throws IOException;
+
+    /**
+     * Elasticsearch에 저장된 특정 유저가 작성한 게시글에 포함된 모든 이미지 이름들을 리턴하는 함수
+     * 
+     * @param authorId 게시글을 작성한 유저의 ID
+     * 
+     * @return 해당 유저가 작성한 게시글에 포함된 모든 이미지의 URL
+     * 
+     * @throws IOException Elasticsearch 읽기 작업 중 오류 발생할 경우
+     */
+    public List<String> getAllImageNamesByAuthorId(String authorId) throws IOException;
+
+    /**
+     * Elasticsearch에 저장된 특정 유저가 작성한 게시글 모두 삭제하는 함수
+     * 
+     * @param authorId 게시글을 작성한 유저의 ID
+     * 
+     * @throws IOException Elasticsearch 삭제 작업 중 오류 발생할 경우
+     */
+    public void deleteAllPostsByAuthorId(String authorId) throws IOException;
 }

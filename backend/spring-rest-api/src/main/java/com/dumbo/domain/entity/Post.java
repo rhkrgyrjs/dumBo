@@ -16,7 +16,11 @@ public class Post
     @Id
     private String esId;
 
+    private String authorId;
+
     public String getEsId() { return this.esId; }
+    public String getAuthorId() { return this.authorId; }
     
     public void setEsId(String esId) { this.esId = esId; }
+    public void setAuthorId(String userId) { this.authorId = userId; }
 }

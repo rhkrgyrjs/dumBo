@@ -2,7 +2,8 @@ package com.dumbo.repository.dao;
 
 import java.sql.SQLException;
 
-import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.dto.UserModifyDTO;
+import com.dumbo.domain.dto.UserRegisterDTO;
 import com.dumbo.domain.entity.User;
 
 /**
@@ -67,5 +68,26 @@ public interface UserDao
      * 
      * @throws SQLException RDBMS 쓰기 작업 중 오류 발생할 경우
      */
-    public void createUser(UserDTO userDto) throws SQLException;
+    public void createUser(UserRegisterDTO userDto) throws SQLException;
+
+    /**
+     * 유저 정보를 수정하는 메소드
+     * UserModifyDTO에 모든 정보가 null이 아닌지 검증 필요함
+     * 
+     * @param userId 수정할 유저의 ID
+     * @param userDto 수정할 정보
+     * 
+     * @throws SQLException RDBMS 쓰기 작업 중 오류 발생할 경우
+     */
+    public void modifyUser(String userId, UserModifyDTO userDto) throws SQLException;
+
+    /**
+     * 유저 정보를 삭제하는 메소드
+     * SQL DDL 레벨에서 유저가 작성한 게시글/댓글/답글, 유저가 작성한 게시글/댓글에 달린 댓글/답글도 전부 삭제됨
+     * 
+     * @param userId 삭제할 유저의 ID
+     * 
+     * @throws SQLException RDBMS 삭제 작업 중 오류 발생할 경우
+     */
+    public void deleteUser(String userId) throws SQLException;
 }

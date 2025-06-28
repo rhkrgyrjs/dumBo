@@ -2,6 +2,7 @@ package com.dumbo.service.serviceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import com.dumbo.exception.DatabaseWriteException;
 import com.dumbo.exception.ForbiddenActionException;
 import com.dumbo.exception.PostNotFoundException;
 import com.dumbo.repository.dao.PostDao;
+import com.dumbo.service.ImageServiceTemp;
 import com.dumbo.service.PostService;
 
 @Service
@@ -25,10 +27,13 @@ public class PostServiceImpl implements PostService
     @Autowired
     private PostDao postDao;
 
+    @Autowired
+    private ImageServiceTemp imgTemp;
+
     public Post createPost (User user, PostDTO postDto) throws DatabaseWriteException
     {
         String postId = null;
-        try { postId = postDao.insertPostIdAndReturnId(); }
+        try { postId = postDao.insertPostIdAndReturnId(user); }
         catch (SQLException e ) { throw new DatabaseWriteException("게시글 키 생성에 실패했습니다."); } // RDBMS에 post.id 생성
 
         try { postDao.pushPost(postId, user, postDto); }
@@ -49,7 +54,7 @@ public class PostServiceImpl implements PostService
 
         // 게시글 피드 생성
         try { return postDao.getArticleFeed(createdAtCursor, postIdCursor, limit, reverse); }
-        catch (IOException e) { throw new DatabaseReadException("게시글 피드 정보를 불러오는 데 실패했습니다."); }
+        catch (IOException e) { throw new DatabaseReadException("게시글 피드 정보를 불러오는 데 실패했습니다." + e.getMessage()); }
     }
 
     public void deletePost(User user, String postId)
@@ -61,11 +66,21 @@ public class PostServiceImpl implements PostService
         // 게시글을 삭제할 권한이 사용자에게 없을 경우
         if (!user.getId().equals(article.getAuthorId())) throw new ForbiddenActionException("다른 사람의 게시글은 삭제할 수 없습니다.");
 
+        // TODO: 여기에 게시글에 포함된 사진 삭제하는 루틴 추가해야 함
+        List<String> imgNames = null;
+        try { imgNames = postDao.getImageNamesByPostId(postId); }
+        // 이건 로그로 빼던가 해야 함. 사진 못 찾았다고 게시글 삭제 못하는 건 말이 안 되니까
+        catch (IOException e) { throw new DatabaseReadException("게시글에 포함된 이미지 경로를 읽는 데 실패했습니다."); }
+
         try { postDao.deletePostContent(postId); }
         catch (IOException e) { throw new DatabaseDeleteException("게시글 내용을 삭제하는 데 실패했습니다."); }
 
         try { postDao.deletePostId(postId); }
         catch(SQLException e) { throw new DatabaseDeleteException("게시글 키를 삭제하는 데 실패했습니다."); }
+
+        // 첨부 이미지 삭제
+        // 나중에 카프카로 빼야 함
+        if (imgNames != null) imgTemp.deleteImages(imgNames);
     }
 
 

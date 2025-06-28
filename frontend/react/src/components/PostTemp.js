@@ -173,7 +173,7 @@ const PostTemp = ({ z }) => {
           customBlockRenderFunc={imageBlockRenderer}
           wrapperClassName={`flex flex-col h-full z-${z}`}
           toolbarClassName={`!sticky top-0 z-${z} bg-white mb-2`}
-          editorClassName={`flex-1 overflow-y-auto px-2 z-${z}`}
+          editorClassName={`flex-1 overflow-y-auto px-2`}
           toolbar={{
             options: [
               "inline",

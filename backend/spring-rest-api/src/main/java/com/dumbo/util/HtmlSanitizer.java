@@ -6,7 +6,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 @Component
 public class HtmlSanitizer 
@@ -100,4 +102,28 @@ public class HtmlSanitizer
         }
         return null;
     }
+
+
+    public List<String> extractImageFileNames(String sanitizedHtml) 
+    {
+        List<String> imageNames = new ArrayList<>();
+        if (sanitizedHtml == null || sanitizedHtml.isEmpty()) return imageNames;
+
+        Document doc = Jsoup.parse(sanitizedHtml);
+        for (Element img : doc.select("img")) {
+            String src = img.attr("src");
+            if (src.startsWith(ALLOWED_IMAGE_DOMAIN)) {
+                // URL에서 마지막 '/' 이후의 문자열이 파일 이름
+                String fileName = src.substring(src.lastIndexOf('/') + 1);
+                if (!fileName.isEmpty()) {
+                    imageNames.add(fileName);
+                }
+            }
+        }
+
+        return imageNames;
+    }
+
+
+
 }

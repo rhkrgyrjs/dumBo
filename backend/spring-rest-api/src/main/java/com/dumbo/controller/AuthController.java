@@ -10,8 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.entity.User;
+import com.dumbo.domain.dto.UserModifyDTO;
+import com.dumbo.domain.dto.UserRegisterDTO;
 import com.dumbo.service.AuthService;
+
+
 
 /**
  * AuthController
@@ -120,7 +124,7 @@ public class AuthController
      * { "message": "회원가입 중 오류가 발생했습니다." }
      */
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserDTO userDto)
+    public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserRegisterDTO userDto)
     {
         // 회원가입 처리
         authServ.signup(userDto);
@@ -179,7 +183,33 @@ public class AuthController
         return ResponseEntity.ok(authServ.emailDupCheck(email));
     }
 
-    // Patch : 개인정보 수정하기
+    @PatchMapping("/profile")
+    public ResponseEntity<Map<String, String>> updateUser(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @Valid @RequestBody UserModifyDTO userDto)
+    {
+        // Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
+
+        // 유저 정보 수정
+        authServ.modifyUserInfo(user, userDto);
+
+        // 응답 리턴
+        return ResponseEntity.ok(Map.of("message", "유저 정보 수정에 성공했습니다."));
+
+    }
+
+    @DeleteMapping("/resign")
+    public ResponseEntity<Map<String, String>> deleteUser(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body)
+    {
+        // Access Token 유효성 검증
+        User user = authServ.getUserFromAccessToken(authorizationHeader);
+
+        // 비밀번호 검증
+        // 회원 탈퇴(정보 삭제 + 리프레시 토큰 바로 만료 + 썻던 글에 있는 사진들 모두 삭제)
+        authServ.deleteUser(user, body.get("password"));
+
+        // 응답 리턴
+        return ResponseEntity.ok(Map.of("message", "회원 탈퇴에 성공했습니다."));
+    }
     // DELETE : 회원탈퇴하기
     // 메소드 만들어야 함
 }

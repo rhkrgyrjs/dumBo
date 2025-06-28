@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.dumbo.domain.dto.UserDTO;
+import com.dumbo.domain.dto.UserModifyDTO;
+import com.dumbo.domain.dto.UserRegisterDTO;
 import com.dumbo.domain.entity.User;
 import com.dumbo.repository.dao.UserDao;
 import com.dumbo.repository.rdbms.DBConnectionMaker;
@@ -112,7 +114,7 @@ public class UserDaoImpl implements UserDao
         }
     }
 
-    public void createUser(UserDTO userDto) throws SQLException
+    public void createUser(UserRegisterDTO userDto) throws SQLException
     {
         String sql = "INSERT INTO users (email, password, nickname) VALUES (?, ?, ?)";
 
@@ -125,4 +127,35 @@ public class UserDaoImpl implements UserDao
             if (ps.executeUpdate() == 0) throw new SQLException("Creating user failed, no rows affected.");
         }
     }
+
+
+    public void modifyUser(String userId, UserModifyDTO userDto) throws SQLException
+    {
+        // UserModifyDTO는 최소 하나의 필드가 null이 아님을 보장하는 로직이 service에 존재
+        String sql = "UPDATE users SET email = COALESCE(?, email), nickname = COALESCE(?, nickname), password = COALESCE(?, password) WHERE id = ?";
+
+        try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, userDto.getEmail());
+            ps.setString(2, userDto.getNickname());
+            if (userDto.getPassword() != null) ps.setString(3, Bcrypt.hashPassword(userDto.getPassword()));
+            else ps.setNull(3, Types.CHAR);
+            ps.setString(4, userId);
+            ps.executeUpdate();
+        }
+    }
+
+
+    public void deleteUser(String userId) throws SQLException
+    {
+        // 유저가 작성한 게시글, 댓글은 SQL DDL 레벨에서 DELETE CASCADE 됨
+        String sql = "DELETE FROM users WHERE id = ?";
+
+        try (Connection c = this.connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
+        {
+            ps.setString(1, userId);
+            ps.executeUpdate();
+        }
+    }
+
 }

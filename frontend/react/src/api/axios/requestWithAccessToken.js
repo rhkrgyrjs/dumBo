@@ -48,5 +48,21 @@ export async function DeleteRequestWithAccessToekn(accessToken, api)
     return axiosInstance.delete(api);
 }
 
+export async function DeleteRequestWithAccessTokenWithBody(accessToken, api, body) {
+    axiosInstance.interceptors.request.use(
+        (config) => {
+            if (accessToken !== null) {
+                config.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            return config;
+        }, 
+        (error) => Promise.reject(error)
+    );
+
+    return axiosInstance.delete(api, {
+        data: body // 여기!
+    });
+}
+
 
 export default PostRequestWithAccessToken;

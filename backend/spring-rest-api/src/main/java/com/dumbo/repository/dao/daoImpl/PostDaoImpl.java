@@ -5,8 +5,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,12 +27,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.DeleteByQueryRequest;
+import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
+import co.elastic.clients.elasticsearch.core.ScrollRequest;
+import co.elastic.clients.elasticsearch.core.ScrollResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 import java.time.Instant;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -50,13 +61,14 @@ public class PostDaoImpl implements PostDao
     @Autowired
     private UUIDGenerator uuidGenerator;
 
-    public String insertPostIdAndReturnId() throws SQLException
+    public String insertPostIdAndReturnId(User user) throws SQLException
     {
-        String sql = "INSERT INTO posts (es_id) VALUES (?)";
+        String sql = "INSERT INTO posts (es_id, author_id) VALUES (?, ?)";
         String uuid = uuidGenerator.generate();
         try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
         {
             ps.setString(1, uuid);
+            ps.setString(2, user.getId());
             ps.executeUpdate();
         }
         return uuid;
@@ -71,12 +83,13 @@ public class PostDaoImpl implements PostDao
         article.put("title", postDto.getTitle());
         String sanitizedHtml = sanitizer.sanitizeHtml(postDto.getContent());
         article.put("thumbnail_img_url", sanitizer.extractThumbnailImageUrl(sanitizedHtml));
+        article.put("imgs", sanitizer.extractImageFileNames(sanitizedHtml)); // 여기에 이름만 추출
         article.put("content_html", sanitizedHtml);
         article.put("content_text", sanitizer.extractText(sanitizedHtml));
         article.put("created_at", Instant.now().getEpochSecond());
         article.put("updated_at", null);
-        article.put("views", 0);
         article.put("likes", 0);
+        article.put("dislikes", 0);
         
         esClient.index(i -> i.index("posts").id((String) article.get("post_id")).document(article));
     }
@@ -119,40 +132,26 @@ public class PostDaoImpl implements PostDao
         esClient.delete(d -> d.index("posts").id(documentId));
     }
 
-    /*
-    public Post createArticle(User user, PostDTO postDto) throws SQLException, JsonProcessingException
+
+    public List<String> getImageNamesByPostId(String postId) throws IOException
     {
-        String sql = "INSERT INTO posts (es_id) VALUES (?)";
-        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql);)
-        {
-            String uuid = UUID.randomUUID().toString();
-            ps.setString(1, uuid);
-            ps.executeUpdate();
-            Post post = new Post();
-            post.setEsId(uuid);
+        SearchRequest searchRequest = SearchRequest.of(s -> s.index("posts").size(1).query(q -> q.term(t -> t.field("post_id").value(postId))).source(src -> src.filter(f -> f.includes("imgs"))));
+        SearchResponse<Map> searchResponse = esClient.search(searchRequest, Map.class);
+        List<Hit<Map>> hits = searchResponse.hits().hits();
 
-            // 여기에 카프카 설정 -> 엘라스틱서치가 postDto에 있는 값과 유저명 저장하도록
-            Map<String, Object> article = new HashMap<>();
-            article.put("post_id", post.getEsId());
-            article.put("author_id", user.getId());
-            article.put("author_nickname", user.getNickname());
-            article.put("title", postDto.getTitle());
-            String sanitizedHtml = sanitizer.sanitizeHtml(postDto.getContent());
-            article.put("thumbnail_img_url", sanitizer.extractThumbnailImageUrl(sanitizedHtml));
-            article.put("content_html", sanitizedHtml);
-            article.put("content_text", sanitizer.extractText(sanitizedHtml));
-            article.put("created_at", Instant.now().getEpochSecond());
-            article.put("updated_at", null);
-            article.put("views", 0);
-            article.put("likes", 0);
+        if (hits.isEmpty()) return Collections.emptyList();
 
-            String jsonMessage = objectMapper.writeValueAsString(article);
-            kafkaTemplate.send("post-draft", jsonMessage);
+        Hit<Map> hit = hits.get(0);
+        Object imgsObj = hit.source().get("imgs");
 
-            return post;
-        }
+        if (!(imgsObj instanceof List<?>)) return Collections.emptyList();
+
+        Set<String> uniqueImageNames = new HashSet<>();
+        for (Object url : (List<?>) imgsObj) if (url != null) uniqueImageNames.add(url.toString());
+        
+        return new ArrayList<>(uniqueImageNames);
     }
-    */
+
     
     // postId로 es에 저장된 게시글 하나 찾는 메소드
     public ArticleDTO getArticleByPostId(String postId)
@@ -173,43 +172,6 @@ public class PostDaoImpl implements PostDao
         } catch (IOException e) { return null; }
     }
 
-    /*
-    public boolean deleteArticle(String postId) throws SQLException, IOException
-    {
-        // 캐싱된 글 있다면 삭제 해야 함
-        // 글 캐싱은 구현중
-
-        String sql = "DELETE FROM posts WHERE es_id = ?";
-        // RDBMS에서 삭제
-        try (Connection c = connectionMaker.makeConnection(); PreparedStatement ps = c.prepareStatement(sql))
-        {
-            ps.setString(1, postId);
-            ps.executeUpdate();
-        }
-
-        try 
-        {
-            // 1) post_id로 문서 검색
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                                                .index("posts")
-                                                .query(q -> q.term(t -> t.field("post_id")
-                                                .value(FieldValue.of(postId))))
-                                                .size(1)
-                                                .build();
-
-            SearchResponse<ArticleDTO> searchResponse = esClient.search(searchRequest, ArticleDTO.class);
-
-            if (searchResponse.hits().hits().isEmpty()) return true; // 해당 postId의 게시글이 존재하지 않을 경우(이미 삭제됨)
-
-            String documentId = searchResponse.hits().hits().get(0).id();  // ES 문서 _id
-
-            // 2) ES 문서 삭제
-            var deleteResponse = esClient.delete(d -> d.index("posts").id(documentId));
-
-            return deleteResponse.result().name().equalsIgnoreCase("deleted");
-        } catch (IOException e) { throw e; }
-    }
-    */
 
    public CursorResult<ArticleDTO> getArticleFeed(Long createdAtCursor, String postIdCursor, int limit, boolean reverse) throws IOException 
    {
@@ -255,7 +217,56 @@ public class PostDaoImpl implements PostDao
         return new CursorResult<ArticleDTO>(articles, nextCreatedAt, nextPostId, hasMore);
     }
 
+    public List<String> getAllImageNamesByAuthorId(String authorId) throws IOException 
+    {
+        int batchSize = 1000;
+        Set<String> uniqueUrls = new HashSet<>();
+        AtomicReference<String> scrollIdRef = new AtomicReference<>();
 
+        Query query = Query.of(q -> q.term(t -> t.field("author_id").value(authorId)));
+
+        // 1. 최초 검색 scroll 시작
+        SearchRequest searchRequest = SearchRequest.of(s -> s.index("posts").size(batchSize).scroll(Time.of(t -> t.time("2m"))).query(query).source(src -> src.filter(f -> f.includes("imgs"))));
+        SearchResponse<Map> searchResponse = esClient.search(searchRequest, Map.class);
+        for (Hit<Map> hit : searchResponse.hits().hits()) 
+        {
+            Object imageUrlsObj = hit.source().get("imgs");
+            if (imageUrlsObj instanceof List<?>) for (Object url : (List<?>) imageUrlsObj) if (url != null) uniqueUrls.add(url.toString());
+        }
+
+        scrollIdRef.set(searchResponse.scrollId());
+
+        // 2. scroll 반복 호출로 다음 문서들 조회
+        while (scrollIdRef.get() != null && !scrollIdRef.get().isEmpty()) 
+        {
+            ScrollRequest scrollRequest = ScrollRequest.of(r -> r.scrollId(scrollIdRef.get()).scroll(Time.of(t -> t.time("2m"))));
+            ScrollResponse<Map> scrollResponse = esClient.scroll(scrollRequest, Map.class);
+            List<Hit<Map>> hits = scrollResponse.hits().hits();
+
+            if (hits.isEmpty()) break;
+
+            for (Hit<Map> hit : hits) 
+            {
+                Object imageUrlsObj = hit.source().get("imgs");
+                if (imageUrlsObj instanceof List<?>) for (Object url : (List<?>) imageUrlsObj) if (url != null) uniqueUrls.add(url.toString());
+                
+            }
+            scrollIdRef.set(scrollResponse.scrollId());
+        }
+
+        // 3. scroll 컨텍스트 클리어
+        if (scrollIdRef.get() != null && !scrollIdRef.get().isEmpty()) esClient.clearScroll(c -> c.scrollId(scrollIdRef.get()));
+
+        return new ArrayList<>(uniqueUrls);
+    }
+
+
+    public void deleteAllPostsByAuthorId(String authorId) throws IOException 
+    {
+        Query query = Query.of(q -> q.term(t -> t.field("author_id").value(authorId)));
+        DeleteByQueryRequest request = DeleteByQueryRequest.of(d -> d.index("posts").query(query));
+        esClient.deleteByQuery(request);
+    }
 
     
 }

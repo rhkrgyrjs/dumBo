@@ -59,5 +59,44 @@ def upload_image():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# --------------------
+# 새로 추가할 이미지 삭제 API
+# --------------------
+@app.route('/delete-images', methods=['POST'])
+def delete_images():
+    data = request.get_json()
+    print(data)
+    if not data or 'filenames' not in data:
+        return jsonify({"error": "Missing 'filenames' in request body"}), 400
+
+    filenames = data['filenames']
+    if not isinstance(filenames, list):
+        return jsonify({"error": "'filenames' must be a list"}), 400
+
+    deleted = []
+    not_found = []
+
+    for filename in filenames:
+        # 안전하게 경로 조합
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # 디렉터리 탈출 공격 방지
+        if not os.path.abspath(file_path).startswith(os.path.abspath(app.config['UPLOAD_FOLDER'])):
+            continue
+
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                deleted.append(filename)
+            except Exception as e:
+                # 삭제 실패해도 무시하거나 로그 남기기
+                print(f"Error deleting {filename}: {e}")
+        else:
+            not_found.append(filename)
+
+    return jsonify({
+        "deleted": deleted,
+        "not_found": not_found
+    })
+
 if __name__ == "__main__":
     app.run(port=5000)
