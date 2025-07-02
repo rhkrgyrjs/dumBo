@@ -123,8 +123,7 @@ public class UserDaoImpl implements UserDao
             ps.setString(1, userDto.getEmail());
             ps.setString(2, Bcrypt.hashPassword(userDto.getPassword())); // Bcrypt 암호화
             ps.setString(3, userDto.getNickname());
-            
-            if (ps.executeUpdate() == 0) throw new SQLException("Creating user failed, no rows affected.");
+            ps.executeUpdate();
         }
     }
 

@@ -198,18 +198,16 @@ public class AuthController
     }
 
     @DeleteMapping("/resign")
-    public ResponseEntity<Map<String, String>> deleteUser(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body)
+    public ResponseEntity<Map<String, String>> deleteUser(@RequestHeader(name = "Authorization", required = false) String authorizationHeader, @RequestBody Map<String, String> body, HttpServletResponse servResponse)
     {
         // Access Token 유효성 검증
         User user = authServ.getUserFromAccessToken(authorizationHeader);
 
         // 비밀번호 검증
         // 회원 탈퇴(정보 삭제 + 리프레시 토큰 바로 만료 + 썻던 글에 있는 사진들 모두 삭제)
-        authServ.deleteUser(user, body.get("password"));
+        authServ.deleteUser(user, body.get("password"), servResponse);
 
         // 응답 리턴
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴에 성공했습니다."));
     }
-    // DELETE : 회원탈퇴하기
-    // 메소드 만들어야 함
 }

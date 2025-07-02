@@ -60,7 +60,9 @@ public class PostServiceImpl implements PostService
     public void deletePost(User user, String postId)
     {
         // 게시글이 존재하지 않을 경우
-        ArticleDTO article = postDao.getArticleByPostId(postId);
+        ArticleDTO article = null;
+        try { article = postDao.getArticleByPostId(postId); }
+        catch (IOException e) { throw new DatabaseReadException("게시글 정보를 불러오는 데 실패했습니다."); }
         if (article == null) throw new PostNotFoundException();
         
         // 게시글을 삭제할 권한이 사용자에게 없을 경우

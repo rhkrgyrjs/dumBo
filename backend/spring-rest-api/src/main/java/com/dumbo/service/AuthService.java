@@ -122,5 +122,16 @@ public interface AuthService
      */
     public void modifyUserInfo(User user, UserModifyDTO userDto) throws BadRequestException, DatabaseWriteException;
 
-    public void deleteUser(User user, String password) throws ForbiddenActionException, DatabaseReadException, DatabaseDeleteException;
+    /**
+     * 유저 정보 삭제 메소드
+     * 
+     * @param user 삭제할 유저 정보
+     * @param password 삭제할 유저의 비밀번호 평문
+     * @param servletResponse 유저에게 리턴할 리프레시 토큰 쿠키 만료 HttpServletResponse
+     * 
+     * @throws ForbiddenActionException 비밀번호가 일치하지 않을 경우
+     * @throws DatabaseReadException 유저 정보/유저가 작성한 글의 정보들을 불러오는 과정 중 오류 발생
+     * @throws DatabaseDeleteException 유저 정보/유저가 작성한 글의 정보들 삭제 과정 중 오류 발생
+     */
+    public void deleteUser(User user, String password, HttpServletResponse servletResponse) throws ForbiddenActionException, DatabaseReadException, DatabaseDeleteException;
 }

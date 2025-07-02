@@ -29,6 +29,7 @@ import com.dumbo.exception.MissingAccessTokenException;
 import com.dumbo.exception.RefreshTokenExpiredException;
 import com.dumbo.exception.UserNotFoundException;
 import com.dumbo.repository.dao.PostDao;
+import com.dumbo.repository.dao.TokenDao;
 import com.dumbo.repository.dao.UserDao;
 import com.dumbo.service.AuthService;
 import com.dumbo.service.ImageServiceTemp;
@@ -46,6 +47,9 @@ public class AuthServiceImpl implements AuthService
 
     @Autowired
     private PostDao postDao;
+
+    @Autowired
+    private TokenDao tokenDao;
 
 
     @Autowired
@@ -263,7 +267,7 @@ public class AuthServiceImpl implements AuthService
     }
 
 
-    public void deleteUser(User user, String password) throws ForbiddenActionException, DatabaseReadException, DatabaseDeleteException
+    public void deleteUser(User user, String password, HttpServletResponse servletResponse) throws ForbiddenActionException, DatabaseReadException, DatabaseDeleteException
     {
         // 비밀번호 검증
         if (!Bcrypt.verifyPassword(password, user.getPassword())) throw new ForbiddenActionException("비밀번호가 일치하지 않습니다.");
@@ -286,6 +290,13 @@ public class AuthServiceImpl implements AuthService
         // DB에서 유저 삭제
         try { userDao.deleteUser(user.getId()); }
         catch(SQLException e) { throw new DatabaseDeleteException("유저 정보 삭제 중 오류가 발생했습니다."); }
+
+        // 유저의 리프레시 토큰 만료
+        tokenDao.deleteRefreshToken(user.getId());
+        
+        // 리프레시 토큰 만료 쿠키 세팅
+        // 리프레시 토큰이 담긴 쿠키를 만료시키는 쿠키 설정
+        servletResponse.addHeader("Set-Cookie", jwt.getInvalidateRefreshTokenCookie());
 
         // 카프카로 유저 사진 삭제 넘길 코드 여기 쓰자.
         // 일단은 임시로 여기에 사진삭제 코드 써놔보자

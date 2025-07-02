@@ -65,7 +65,7 @@ export async function login(email, password)
             // 다른 에러 발생 시
             console.log(error);
         }
-        return null;
+        return error.data.message;
     }
 }
 
@@ -118,7 +118,6 @@ export async function signup(email, password, nickname)
     
     try
     {
-        // 로그인 요청
         const res = await request.post(
             '/auth/signup',
             { 'email' : email, 'password' : password, 'nickname' : nickname }

@@ -17,6 +17,7 @@ import co.elastic.clients.elasticsearch.core.IndexResponse;
 @Service
 public class PostDraftConsumer 
 {
+    /*
     @Autowired
     private ElasticsearchClient esClient;
 
@@ -42,4 +43,5 @@ public class PostDraftConsumer
             // 여기에 엘라스틱서치에 게시글 저장하는 루틴 작성해야 할 듯?
         } catch (IOException e) { e.printStackTrace(); } // 여기에 카프카 동작 실패시 로깅
     }
+    */
 }

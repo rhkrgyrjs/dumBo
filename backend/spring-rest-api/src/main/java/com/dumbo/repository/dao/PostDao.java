@@ -15,17 +15,16 @@ import java.util.List;
  */
 public interface PostDao 
 {
-    // public Post createArticle(User user, PostDTO postDto) throws SQLException, JsonProcessingException;
-    // public boolean deleteArticle(String postId) throws SQLException, IOException;
-
     /**
      * 게시글을 게시글 ID를 통해 가져오는 메소드
      * 
      * @param postId 가져올 게시글의 ID
      * 
      * @return 게시글 정보
+     * 
+     * @throws IOException Elasticsearch 읽기 작업 중 오류 발생할 경우
      */
-    public ArticleDTO getArticleByPostId(String postId);
+    public ArticleDTO getArticleByPostId(String postId) throws IOException;
 
     /**
      * 게시글을 묶음으로(피드) 가져오는 메소드

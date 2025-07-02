@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ReplyCountComsumer 
 {
+    /*
     @Autowired
     private CommentDao commentDao;
 
@@ -33,4 +34,5 @@ public class ReplyCountComsumer
             commentDao.incReplyCount(articleMap.get("comment_id"));
         } catch (IOException | SQLException e) { e.printStackTrace(); } // 여기에 카프카 동작 실패시 로깅
     }
+    */
 }
